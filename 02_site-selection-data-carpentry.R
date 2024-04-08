@@ -12,7 +12,7 @@ library(ggplot2)
 
 # Specify the root of the data directory
 
-DATADIR = "/home/derek/Documents/repo-data-local/yuba-phys_data/"
+DATADIR = "/Users/anjumgujral/Box Sync/yuba-phys_data"
 
 ## LOAD DATA (including some reprojection and initial visualization)
 
@@ -50,7 +50,25 @@ trt2 = sf::st_read(file.path(DATADIR, "future-treatment-polys", "Trapper_PAC_STS
 
 # TODO: add more planned treatment datasets provided by TNC/USFS
 
+trt3 = sf::st_read(file.path(DATADIR, "future-treatment-polys", "Trapper_STS_Units_Final", "Trapper_STS_Final.shp")) |>
+  dplyr::mutate(project = "Trapper_STS") |>
+  sf::st_transform(3310)
 
+trt4 = sf::st_read(file.path(DATADIR, "future-treatment-polys", "Trapper_Sales", "AlaskaPeakIRTC_Official.shp")) |>
+  dplyr::mutate(project = "Trapper_Sales_AlaskaPeak") |>
+  sf::st_transform(3310)
+
+trt5 = sf::st_read(file.path(DATADIR, "future-treatment-polys", "Trapper_Sales", "GraveyardSale_Draft20220607.shp")) |>
+  dplyr::mutate(project = "Trapper_Sales_GraveyardSale") |>
+  sf::st_transform(3310)
+
+trt6 = sf::st_read(file.path(DATADIR, "future-treatment-polys", "Trapper_Sales", "SleighvilleTimberSale.shp")) |>
+  dplyr::mutate(project = "Trapper_Sales_SleighvilleTimberSale.shp") |>
+  sf::st_transform(3310)
+
+trt7 = sf::st_read(file.path(DATADIR, "future-treatment-polys", "Unit_F11b", "Unit_F11b.shp")) |>
+  dplyr::mutate(project = "Unit_F11b") |>
+  sf::st_transform(3310)
 
 ## PROCESSING
 
@@ -75,7 +93,7 @@ sf::st_write(own, dsn = file.path(DATADIR, "tmp", "own.gpkg"), delete_dsn = TRUE
 
 
 # Combine all the treatment layers that were loaded in the LOAD DATA step into one geospatial data frame
-trt = dplyr::bind_rows(trt1, trt2)
+trt = dplyr::bind_rows(trt1, trt2, trt3, trt4, trt5, trt6, trt7)
 
 # Buffer all polygons out by 10 m to remove the tiny gaps between some treatment polygons due to imprecise mapping
 trt = st_buffer(trt, dist = 10)
