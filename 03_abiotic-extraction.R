@@ -30,6 +30,7 @@ plot(candidate_transf)
 candidate_transf
 
 
+
 #prism vpd max and vpd (30 year normals, maximum annual vpd)
 #vpd should be highly correlated with elevation 
 
