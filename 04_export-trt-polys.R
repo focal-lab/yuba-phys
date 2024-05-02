@@ -1,5 +1,5 @@
-# Purpose: Aggregate and summarize geospatial data into a format that is convenient for defining plot selection.
-# Input data includes past treatments, planned future treatments, topography (elev, SRI, etc), project area bounds
+# Purpose: Simplify and union the FACTS polygons for KML export in a form that is not too complex it
+# will bog down Avenza
 
 ## SETUP
 
