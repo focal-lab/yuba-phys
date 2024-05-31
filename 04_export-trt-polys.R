@@ -20,8 +20,26 @@ DATADIR = "/Users/anjumgujral/Box Sync/yuba-phys_data"
 facts = st_read(file.path(DATADIR, "facts", "processed", "facts_thinning_focal.gpkg"))
 planned = st_read(file.path(DATADIR, "future-treatment-polys", "TNC_DataRequest_Mar15.2024.gdb"))
 
-planned = st_layers(file.path(DATADIR, "future-treatment-polys", "TNC_DataRequest_Mar15.2024.gdb"))
 
+
+layers = st_layers(file.path(DATADIR, "future-treatment-polys", "TNC_DataRequest_Mar15.2024.gdb"))
+lyrs = layers$name[c(2:7,9:14)]
+
+
+combined = st_read(file.path(DATADIR, "future-treatment-polys", "TNC_DataRequest_Mar15.2024.gdb"), layer = "Gauntlet_Units") |> st_union() |> st_as_sf()
+
+
+for(lyr in lyrs) {
+
+  lyr_foc = st_read(file.path(DATADIR, "future-treatment-polys", "TNC_DataRequest_Mar15.2024.gdb"), layer = lyr) |> st_union() |> st_as_sf()
+  combined = st_union(combined, lyr_foc)
+    
+  
+}
+
+
+
+st_write(combined, file.path(DATADIR, "future-treatment-polys", "TNC_DataRequest_Mar15.2024.kmz"))
 
 
 # Simplyfy the FACTS polygons as much as possible
