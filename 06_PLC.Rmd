@@ -1,0 +1,18 @@
+---
+title: "06_PLC"
+author: "Anjum K. Gujral"
+date: '2024-08-25'
+output: html_document
+---
+
+```{r}
+install.packages('fitplc')
+library(fitplc)
+
+DATADIR = "/Users/anjumgujral/Box Sync/P50"
+
+PLC <- read.csv("/Users/anjumgujral/Box Sync/P50/p50_7_22_2024.csv")
+
+```
+
+
