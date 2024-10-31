@@ -173,9 +173,51 @@ ggplot(trait_data1, aes(x = microsite, y = predawn_MPa, fill = species)) +
 # heat load index ?
 plot(trait_data1$midday_MPa~trait_data1$stand_basal_area)
 
+# what about differences between size classes?
+ggplot(trait_data1, aes(x = size_class, y = predawn_MPa, fill = species)) +
+  geom_boxplot(position = position_dodge(0.8), outlier.shape = NA) +  
+  facet_wrap(~ elevation) +
+  labs(
+    x = "Size",
+    y = "Predawn Water Potential (-MPa)",
+    fill = "Species") +
+  scale_y_reverse() +  # Reverse the y-axis
+  theme_bw() +
+  theme(
+    panel.grid.major = element_blank(), 
+    panel.grid.minor = element_blank())
+
+ggplot(trait_data1, aes(x = size_class, y = midday_MPa, fill = species)) +
+  geom_boxplot(position = position_dodge(0.8), outlier.shape = NA) +  
+  facet_wrap(~ elevation) +
+  labs(
+    x = "Size",
+    y = "Midday Water Potential (-MPa)",
+    fill = "Species") +
+  scale_y_reverse() +  # Reverse the y-axis
+  theme_bw() +
+  theme(
+    panel.grid.major = element_blank(), 
+    panel.grid.minor = element_blank())
+
+# is midday WP different across size, species, microsite, and elevation
+ggplot(trait_data1, aes(x = microsite, y = midday_MPa, fill = interaction(size_class, species))) +
+  geom_boxplot(position = position_dodge(0.8), outlier.shape = NA) +  
+  facet_wrap(~ elevation) +
+  labs(
+    x = "Microsite",
+    y = "Midday Water Potential (-MPa)",
+    fill = "Species and size") +
+  scale_y_reverse() +  # Reverse the y-axis
+  theme_bw() +
+  theme(
+    panel.grid.major = element_blank(), 
+    panel.grid.minor = element_blank())
+
 # run a pairwise wilcoxon rank sum test to determine whether WP is significantly different 
 # between groups 
 
-
+# generate a heat load index to test whether heat load index explains variation in WP 
+# across elevations
 
 
