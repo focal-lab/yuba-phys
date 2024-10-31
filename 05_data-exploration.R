@@ -130,15 +130,52 @@ trait_data1$DBH_complete <- ifelse(is.na(trait_data1$DBH), trait_data1$predicted
 library('ggplot2')
 #compare trends between DBH and seedling height for actual and predicted data
 ggplot(trait_data1, aes(x = seedling_height_cm, y = DBH)) +
-  geom_point(color = "blue", alpha = 0.5) +
-  geom_point(aes(y = predicted_DBH), color = "red", alpha = 0.5) +
+  geom_point(color = "blue") +
+  geom_point(aes(y = predicted_DBH), color = "red") +
   geom_smooth(method = "lm", se = FALSE, color = "blue", linetype = "dashed") +
   geom_smooth(aes(y = predicted_DBH), method = "lm", se = FALSE, color = "red", linetype = "dashed") +
-  labs(title = "Comparison of Actual and Predicted DBH vs Seedling Height",
-       x = "Seedling Height (cm)",
-       y = "DBH (cm)") +
-  theme_minimal()
+  theme_bw() + 
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank())
 
-plot(trait_data1$midday_MPa~trait_data1$DBH_complete)
+# preliminary analyses
 
-boxplot(trait_data1$midday_MPa ~ trait_data1$species, by = trait_data1$elevation)
+# do predawn and midday water potentials differ by microsite, species, and elevation?
+ggplot(trait_data1, aes(x = microsite, y = midday_MPa, fill = species)) +
+  geom_boxplot(position = position_dodge(0.8), outlier.shape = NA) +  
+  facet_wrap(~ elevation) +
+  labs(
+       x = "Microsite",
+       y = "Midday Water Potential (-MPa)",
+       fill = "Species") +
+  scale_y_reverse() +  # Reverse the y-axis
+  theme_bw() +
+  theme(
+    panel.grid.major = element_blank(), 
+    panel.grid.minor = element_blank())
+
+
+ggplot(trait_data1, aes(x = microsite, y = predawn_MPa, fill = species)) +
+  geom_boxplot(position = position_dodge(0.8), outlier.shape = NA) +  
+  facet_wrap(~ elevation) +
+  labs(
+    x = "Microsite",
+    y = "Predawn Water Potential (-MPa)",
+    fill = "Species") +
+  scale_y_reverse() +  # Reverse the y-axis
+  theme_bw() +
+  theme(
+    panel.grid.major = element_blank(), 
+    panel.grid.minor = element_blank())
+
+# high elevation plots are oddly more dry, could this be because of stand basal area or 
+# heat load index ?
+plot(trait_data1$midday_MPa~trait_data1$stand_basal_area)
+
+# run a pairwise wilcoxon rank sum test to determine whether WP is significantly different 
+# between groups 
+
+
+
+
