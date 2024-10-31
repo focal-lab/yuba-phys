@@ -214,8 +214,18 @@ ggplot(trait_data1, aes(x = microsite, y = midday_MPa, fill = interaction(size_c
     panel.grid.major = element_blank(), 
     panel.grid.minor = element_blank())
 
-# run a pairwise wilcoxon rank sum test to determine whether WP is significantly different 
-# between groups 
+# stats
+
+# start by testing whether trait data is normally distributed using the Shapiro-Wilk's Test
+shapiro_test <- shapiro.test(trait_data1$predawn_MPa)
+print(shapiro_test) 
+# data are close to normally distributed but with weak significance for
+# both predawn and midday WP measurements 
+
+
+# proceeding with a parametric ANOVA to test differences in mean WP between groups
+# will revisit whether non-parametric is more appropriate
+
 
 # generate a heat load index to test whether heat load index explains variation in WP 
 # across elevations
