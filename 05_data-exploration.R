@@ -6,7 +6,6 @@ library('tidyverse')
 
 ## subset dataframe to include only seedlings and saplings for ABCO, PIPO, PILA, and ABMA
 trait_data1 <- trait_data[trait_data$size_class %in% c('seedling', 'sapling'), ]
-trait_data1 <- trait_data[trait_data$size_class == 'seedling', 'sapling',]
 trait_data1 <- trait_data1[trait_data1$species %in% c('ABCO', 'ABMA','PIPO', 'PILA'), ]
   
 ## summary statistics of dataframe
@@ -70,7 +69,7 @@ hist(trait_data1$seedling_height_cm)
 
 library(dplyr)
 
-# Create DBH intervals and count DBH by species and elevation
+# create DBH intervals and count DBH by species and elevation
 DBH_intervals <- trait_data1 %>%
   mutate(DBH_interval = cut(
     DBH_cm,
@@ -85,5 +84,61 @@ DBH_intervals <- trait_data1 %>%
     .groups = 'drop'
   )
 
+trait_data1$DBH <- as.numeric(as.character(trait_data1$DBH_cm))
+
+hist(trait_data1$DBH_cm)
+
+# make a table to visualize the representation of vulnerability curves across species, 
+#size class, elevation and microsite
+
+P50_microsite_table <- trait_data1 %>%
+  filter(branch_processed == 'yes') %>%
+  group_by(species, elevation, microsite, size_class) %>%
+  summarize(count = n(), .groups = 'drop')
+
+## P50 representation is low for AMBA high elev sun seedling, PIPO high and low elev shade seedling, 
+# PILA low elev sun sapling
+
+P50_elev_table <- trait_data1 %>%
+  filter(branch_processed == 'yes') %>%
+  group_by(species, elevation, size_class) %>%
+  summarize(count = n(), .groups = 'drop')
+
+plot(trait_data1$DBH~trait_data1$seedling_height_cm)
+mod1 <- lm(trait_data1$DBH~trait_data1$seedling_height_cm)
+summary(mod1)
+
+# create a training model using seedlings with height <= 100cm 
+complete_cases <- trait_data1 %>%
+  filter(!is.na(DBH) & seedling_height_cm <= 100)
+
+missing_cases <- trait_data1 %>% filter(is.na(DBH))
+mod2 <- lm(DBH ~ seedling_height_cm, data = complete_cases)
+summary(mod2) # r^2 decreased when filtering to <= 100cm
 
 
+trait_data1$predicted_DBH <- NA
+
+if (nrow(missing_cases) > 0) {
+  predicted_values <- predict(mod2, newdata = missing_cases)
+  trait_data1$predicted_DBH[is.na(trait_data1$DBH)] <- predicted_values
+}
+
+# create a new column that combines observed and predicted DBH values
+trait_data1$DBH_complete <- ifelse(is.na(trait_data1$DBH), trait_data1$predicted_DBH, trait_data1$DBH)
+
+library('ggplot2')
+#compare trends between DBH and seedling height for actual and predicted data
+ggplot(trait_data1, aes(x = seedling_height_cm, y = DBH)) +
+  geom_point(color = "blue", alpha = 0.5) +
+  geom_point(aes(y = predicted_DBH), color = "red", alpha = 0.5) +
+  geom_smooth(method = "lm", se = FALSE, color = "blue", linetype = "dashed") +
+  geom_smooth(aes(y = predicted_DBH), method = "lm", se = FALSE, color = "red", linetype = "dashed") +
+  labs(title = "Comparison of Actual and Predicted DBH vs Seedling Height",
+       x = "Seedling Height (cm)",
+       y = "DBH (cm)") +
+  theme_minimal()
+
+plot(trait_data1$midday_MPa~trait_data1$DBH_complete)
+
+boxplot(trait_data1$midday_MPa ~ trait_data1$species, by = trait_data1$elevation)
