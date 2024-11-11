@@ -1,0 +1,141 @@
+---
+title: "07_preliminary-analyses"
+author: "Anjum K. Gujral"
+date: '2024-11-11'
+output: html_document
+---
+
+```{r, echo = FALSE, message = FALSE, warning = FALSE}
+trait_data1 <- read.csv("/Users/anjumgujral/Documents/repos/yuba-phys/trait_data1.csv")
+
+library('dplyr')
+library('tidyverse')
+library('ggplot2')
+
+```
+
+Size distributions of seedlings and saplings
+
+```{r, echo = FALSE, message = FALSE, warning = FALSE}
+ggplot(trait_data1, aes(x = DBH_complete, fill = size_class)) +
+  geom_histogram(binwidth = 0.5, position = "dodge", alpha = 0.7, color = "black") +
+  labs( 
+       x = "Diameter at root collar (cm)", 
+       y = "Frequency") +
+  scale_fill_manual(values = c("lightblue", "lightgreen")) +
+  theme_bw() +
+  theme(
+    panel.grid.major = element_blank(), 
+    panel.grid.minor = element_blank())
+
+```
+
+Distribution of seedlings and saplings across light environments
+```{r, echo = FALSE, message = FALSE, warning = FALSE}
+
+ggplot(trait_data1, aes(x = DBH_complete, y = percent_cover, color = size_class)) +
+  geom_point(size = 3, alpha = 0.7) +
+  labs(
+       y = "Canopy closure", 
+       x = "Diameter at root collar") +
+  scale_color_manual(values = c("blue", "green")) +
+  theme_bw() +
+  theme(
+    panel.grid.major = element_blank(), 
+    panel.grid.minor = element_blank())
+
+```
+
+Do seedlings and saplings differ in predawn and midday water potentials across elevation?
+```{r, echo = FALSE, message = FALSE, warning = FALSE}
+
+ggplot(trait_data1, aes(x = size_class, y = predawn_MPa, fill = species)) +
+  geom_boxplot(position = position_dodge(0.8), outlier.shape = NA) +  
+  facet_wrap(~ elevation) +
+  labs(
+    x = "Size",
+    y = "Predawn Water Potential (-MPa)",
+    fill = "Species") +
+  scale_y_reverse() +  # Reverse the y-axis
+  theme_bw() +
+  theme(
+    panel.grid.major = element_blank(), 
+    panel.grid.minor = element_blank())
+```
+
+```{r}
+### stats
+mod1 <- lm(predawn_MPa ~ species * size_class * elevation, 
+             data = trait_data1)
+summary(mod1)
+
+```
+
+```{r, echo = FALSE, message = FALSE, warning = FALSE}
+ggplot(trait_data1, aes(x = size_class, y = midday_MPa, fill = species)) +
+  geom_boxplot(position = position_dodge(0.8), outlier.shape = NA) +  
+  facet_wrap(~ elevation) +
+  labs(
+    x = "Size",
+    y = "Midday Water Potential (-MPa)",
+    fill = "Species") +
+  scale_y_reverse() +  # Reverse the y-axis
+  theme_bw() +
+  theme(
+    panel.grid.major = element_blank(), 
+    panel.grid.minor = element_blank())
+
+```
+
+```{r}
+### stats
+mod2 <- lm(midday_MPa ~ species * size_class * elevation, 
+             data = trait_data1)
+summary(mod2)
+
+```
+
+Do predawn and midday water potentials differ across microsite?
+```{r}
+ggplot(trait_data1, aes(x = microsite, y = predawn_MPa, fill = species)) +
+  geom_boxplot(position = position_dodge(0.8), outlier.shape = NA) +  
+  labs(
+    x = "Size",
+    y = "Predawn Water Potential (-MPa)",
+    fill = "Species") +
+  scale_y_reverse() +  # Reverse the y-axis
+  theme_bw() +
+  theme(
+    panel.grid.major = element_blank(), 
+    panel.grid.minor = element_blank())
+
+```
+
+```{r}
+### stats
+mod3 <- lm(predawn_MPa ~ species * percent_cover, 
+             data = trait_data1)
+summary(mod3)
+
+```
+
+
+
+Do predawn and midday water potentials differ by microsite, species, and elevation?
+```{r, echo = FALSE, message = FALSE, warning = FALSE}
+
+ggplot(trait_data1, aes(x = microsite, y = midday_MPa, fill = species)) +
+  geom_boxplot(position = position_dodge(0.8), outlier.shape = NA) +  
+  facet_wrap(~ elevation) +
+  labs(
+       x = "Microsite",
+       y = "Midday Water Potential (-MPa)",
+       fill = "Species") +
+  scale_y_reverse() +  # Reverse the y-axis
+  theme_bw() +
+  theme(
+    panel.grid.major = element_blank(), 
+    panel.grid.minor = element_blank())
+
+```
+
