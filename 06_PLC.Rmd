@@ -43,11 +43,12 @@ library(fitplc)
 ```
 
 ```{r}
-#date 1
-files_0823 <- list.files(path = here::here("raw-data", "2023_data", "cavitron_data","done_20230823"), pattern = "*.csv", full.names = TRUE, include.dirs = T, recursive = T) 
+DATADIR = "/Users/anjumgujral/Box Sync/yuba-phys_data/P50"
+
+cavitron_files <- list.files(path = here::here("P50", "P50_individual"), pattern = "*.csv", full.names = TRUE, include.dirs = T, recursive = T) 
 
 # Read and combine CSV files
-combined_data_0823<- files_0823 %>%
+all_cavitron_data<- cavitron_files %>%
   map_dfr(~read_csv(.x, skip = 1, col_names = read_csv(.x, n_max = 1)))
 
 
@@ -64,6 +65,57 @@ some_condition <- function(row) {
   first_cell <- as.character(row[1])
   return(grepl("Date_time", first_cell, ignore.case = TRUE))
 }
+
+# Loop through rows in combined_data
+for (i in 1:nrow(all_cavitron_data)) {
+  # Check if the current row could be a header (you can customize this condition)
+  if (some_condition(all_cavitron_data[i, ])) {
+    # Set the current row as the column names
+    current_header <- as.character(all_cavitron_data[i, ])
+  } else {
+    # If it's not a header, create a new dataframe and add it to the list
+    if (!is.null(current_header)) {
+      dataframes <- append(dataframes, list(
+        setNames(all_cavitron_data[i, , drop = FALSE], current_header)
+      ))
+    }
+  }
+}
+
+# Combine all the individual dataframes into one
+final_dataframe_0823 <- do.call(rbind, dataframes) %>% 
+  janitor::clean_names() 
+
+seki_vc_all_0823 <- final_dataframe_0823 %>% 
+  janitor::clean_names() %>% 
+  drop_na(campaign_name) %>% 
+  dplyr::mutate(site = as.factor(sampling_location), 
+         tree = as.numeric(sample_ref_1), 
+         branch = sample_ref_2,
+         mpa = as.numeric(pressure_mpa) * -1,
+         pressures = mpa,
+         neg_mpa = as.numeric(pressure_mpa),
+        k = as.numeric(raw_conductance_kg_mpa_s),
+        kstem_length = as.numeric(conductivity_si_corr_t),
+        stem_id = paste(site, tree, branch, sep = "-"),
+        plc_new = as.numeric(plc),
+        species = case_when(
+    species %in% c("Abies concolor") ~ "ABCO", 
+    species %in% c("Pinus lambertiana") ~ "PILA", 
+    species %in% c("Calocedrus decurrens") ~ "CADE", 
+    TRUE ~ as.character(species)), 
+    type = case_when(speed_class %in% c("a") ~ "kmax", 
+                     speed_class %in% c("b", "c","d", "e", "f", "g", "h", "i") ~ "VC", 
+      TRUE ~ as.character(speed_class))) %>% 
+  select(site, tree, branch, mpa, neg_mpa, k, kstem_length, stem_id, plc_new, species, type) %>% 
+  mutate(size = as.factor("B"), 
+         plc_new = case_when(
+           plc_new < 0 ~ 0, 
+           plc_new > 100 ~ 100,
+           TRUE ~ as.numeric(plc_new)
+         )) %>% 
+  drop_na(plc_new)
+
 ```
 
 
