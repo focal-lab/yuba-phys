@@ -6,13 +6,64 @@ output: html_document
 ---
 
 ```{r}
+install.packages('janitor')
+library(janitor)
+install.packages('here')
+library(here)
+install.packages('lubridate')
+library(lubridate)
+install.packages('readxl')
+library(readxl)
+library(gridExtra)
+library(MetBrewer)
+library(dlookr)
+install.packages('beeswarm')
+library(beeswarm)
+library(tidyverse)
+geom_beeswarm = ggbeeswarm::geom_beeswarm()
+here = here::here()
+#install.packages("updater")
+#library(updater)
+#updater::r_version()
+library(scales)
+library(gridExtra)
+#install.packages("Rmisc")
+library(Rmisc)
+#install.packages("fitplc")
+library(ggrepel)
+library(boot)
+library(DEoptim)
+library(devtools)
+library(quickpsy)
+library(fitplc)
+library(dplyr)
+
 install.packages('fitplc')
 library(fitplc)
+```
 
-DATADIR = "/Users/anjumgujral/Box Sync/P50"
+```{r}
+#date 1
+files_0823 <- list.files(path = here::here("raw-data", "2023_data", "cavitron_data","done_20230823"), pattern = "*.csv", full.names = TRUE, include.dirs = T, recursive = T) 
 
-PLC <- read.csv("/Users/anjumgujral/Box Sync/P50/p50_7_22_2024.csv")
+# Read and combine CSV files
+combined_data_0823<- files_0823 %>%
+  map_dfr(~read_csv(.x, skip = 1, col_names = read_csv(.x, n_max = 1)))
 
+
+# Assuming you have a combined dataframe called combined_data
+
+# Initialize an empty list to store individual dataframes
+dataframes <- list()
+
+# Initialize a variable to keep track of the current header
+current_header <- NULL
+
+some_condition <- function(row) {
+  # Check if the first cell in the row contains "Date_time" (case insensitive)
+  first_cell <- as.character(row[1])
+  return(grepl("Date_time", first_cell, ignore.case = TRUE))
+}
 ```
 
 
