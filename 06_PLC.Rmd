@@ -83,31 +83,31 @@ for (i in 1:nrow(all_cavitron_data)) {
 }
 
 # Combine all the individual dataframes into one
-final_dataframe_0823 <- do.call(rbind, dataframes) %>% 
+cavitron_df <- do.call(rbind, dataframes) %>% 
   janitor::clean_names() 
 
-seki_vc_all_0823 <- final_dataframe_0823 %>% 
+vc_all <- cavitron_df %>% 
   janitor::clean_names() %>% 
   drop_na(campaign_name) %>% 
-  dplyr::mutate(site = as.factor(sampling_location), 
+  dplyr::mutate( 
          tree = as.numeric(sample_ref_1), 
-         branch = sample_ref_2,
+         #branch = sample_ref_2,
          mpa = as.numeric(pressure_mpa) * -1,
          pressures = mpa,
          neg_mpa = as.numeric(pressure_mpa),
         k = as.numeric(raw_conductance_kg_mpa_s),
         kstem_length = as.numeric(conductivity_si_corr_t),
-        stem_id = paste(site, tree, branch, sep = "-"),
+        #stem_id = paste(site, tree, branch, sep = "-"),
         plc_new = as.numeric(plc),
-        species = case_when(
-    species %in% c("Abies concolor") ~ "ABCO", 
-    species %in% c("Pinus lambertiana") ~ "PILA", 
-    species %in% c("Calocedrus decurrens") ~ "CADE", 
-    TRUE ~ as.character(species)), 
+        #species = case_when(
+    #species %in% c("Abies concolor") ~ "ABCO", 
+    #species %in% c("Pinus lambertiana") ~ "PILA", 
+    #species %in% c("Calocedrus decurrens") ~ "CADE", 
+    #TRUE ~ as.character(species)), 
     type = case_when(speed_class %in% c("a") ~ "kmax", 
                      speed_class %in% c("b", "c","d", "e", "f", "g", "h", "i") ~ "VC", 
       TRUE ~ as.character(speed_class))) %>% 
-  select(site, tree, branch, mpa, neg_mpa, k, kstem_length, stem_id, plc_new, species, type) %>% 
+  select(tree, mpa, neg_mpa, k, kstem_length, plc_new, type) %>% 
   mutate(size = as.factor("B"), 
          plc_new = case_when(
            plc_new < 0 ~ 0, 
@@ -117,5 +117,23 @@ seki_vc_all_0823 <- final_dataframe_0823 %>%
   drop_na(plc_new)
 
 ```
+
+```{r}
+Have to do each tree individually and remove the ones that do not work: 
+  
+stemID <- subset(vc_all, vc_all$tree =="10.4")
+# Convert all numeric columns to avoid scientific notation
+stemID <- stemID %>%
+  mutate(k = format(k, scientific = FALSE))
+
+fit<- fitcond(stemID, varnames = c(K = "K", WP = "MPa"), Kmax = NULL,
+WP_Kmax = NULL, rescale_Px = FALSE)
+
+pfit <- fitplc(stemID, varnames=c(PLC="k", WP="mpa"), nboot=50)
+plot(pfit)
+##GOOD
+
+
+
 
 
