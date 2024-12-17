@@ -130,17 +130,29 @@ vc_all2 <- vc_all %>%
 ```
 
 ```{r}
-Have to do each tree individually and remove the ones that do not work: 
+#Have to do each tree individually and remove the ones that do not work: 
 
-stemID <- subset(vc_all2, vc_all2$tree =="296.2")
+stemID <- subset(vc_all2, vc_all2$tree =="85.1")
 # Convert all numeric columns to avoid scientific notation
+#stemID <- stemID %>%
+  #mutate(k = format(k, scientific = FALSE))
+#pfit <- fitplc(stemID, varnames=c(PLC="plc_new", WP="mpa"), nboot=50)
+
 stemID <- stemID %>%
-  mutate(k = format(k, scientific = FALSE))
-pfit <- fitplc(stemID, varnames=c(PLC="plc_new", WP="mpa"), nboot=50)
+  mutate(k = format(k, scientific = FALSE),  # Ensure 'k' is formatted as non-scientific
+         valid_data = ifelse(plc_new >= 0, TRUE, FALSE))  # Create valid_data based on plc_new >= 0
+
+# Fit the model using only rows where plc_new >= 0
+pfit <- fitplc(stemID %>% filter(valid_data == TRUE), varnames = c(PLC = "plc_new", WP = "mpa"), nboot = 50)
+
+# Plot the fitted model
 plot(pfit)
-##GOOD
 
+# Access the fitted coefficients
+coefficients <- coef(pfit)
+print(coefficients)
 
+```
 
 
 
