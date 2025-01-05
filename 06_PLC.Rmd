@@ -747,7 +747,7 @@ coef(pfit) %>%
 ABCO -- high elevation 
 ```{r}
 ABCO_high_sun_seedling <- vc_all2 %>% 
-  filter((tree %in% c("5008","167","164")))
+  filter((tree %in% c(247)))
 
 ABCO_high_sun_seedling <- ABCO_high_sun_seedling %>%
   mutate(k = format(k, scientific = FALSE),  # Ensure 'k' is formatted as non-scientific
@@ -777,7 +777,7 @@ coef(pfit) %>%
 
 ```{r}
 ABCO_high_shade_seedling <- vc_all2 %>% 
-  filter((tree %in% c("5006", "33", "153")))
+  filter((tree %in% c("128")))
   
 ABCO_high_shade_seedling <- ABCO_high_shade_seedling %>%
   mutate(k = format(k, scientific = FALSE),  # Ensure 'k' is formatted as non-scientific
@@ -806,7 +806,7 @@ coef(pfit) %>%
 
 ```{r}
 ABCO_high_sun_sapling <-vc_all2 %>% 
-  filter((tree %in% c("186.1", "186.2", "150.1", "209.1", "200.1")))
+  filter((tree %in% c("297.1")))
 
 ABCO_high_sun_sapling <- ABCO_high_sun_sapling %>%
   mutate(k = format(k, scientific = FALSE),  # Ensure 'k' is formatted as non-scientific
@@ -822,7 +822,7 @@ plot(pfit,
      plotci = F, 
      pxlinecol = "black",
      main = "ABCO high elevation, sun exposed sapling",
-     legend = FALSE)
+     legend = TRUE)
 
 coef(pfit) %>% 
   clean_names() %>% 
@@ -835,7 +835,7 @@ coef(pfit) %>%
 
 ```{r}
 ABCO_high_shade_sapling <-vc_all2 %>% 
-  filter(tree %in% c("175.2", "40.1", "40.2","40.3", "51.1","51.2", "118.1", "199.1","199.2"))
+  filter(tree %in% c("60.1","281", "85","307.1"))
 
 ABCO_high_shade_sapling <- ABCO_high_shade_sapling %>%
   mutate(k = format(k, scientific = FALSE),  # Ensure 'k' is formatted as non-scientific
@@ -861,5 +861,121 @@ coef(pfit) %>%
             mean_upr = mean(boot_97_5_percent))
 ```
 
+ABMA Vulnerability Curves
+ABMA -- high elevation
+```{r}
+ABMA_high_sun_seedling <- vc_all2 %>% 
+  filter((tree %in% c("71.1","291")))
 
+ABMA_high_sun_seedling <- ABMA_high_sun_seedling %>%
+  mutate(k = format(k, scientific = FALSE),  # Ensure 'k' is formatted as non-scientific
+         valid_data = ifelse(plc_new >= 0, TRUE, FALSE))  
+
+ABMA_high_sun_seedling <- ABMA_high_sun_seedling %>% filter(valid_data == TRUE)
+
+# Fit the model using only rows where plc_new >= 0
+pfit <- fitplcs(ABMA_high_sun_seedling, "tree", varnames = c(PLC = "plc_new", WP = "mpa"), nboot = 5)
+
+
+coef(pfit)
+plot(pfit,
+     onepanel = T, 
+     plotci = F, 
+     pxlinecol = "black",
+     main = "ABMA high elevation, sun exposed seedling",
+     legend = FALSE)
+
+coef(pfit) %>% 
+  clean_names() %>% 
+  filter(parameter == "PX") %>%
+  summarise(mean_P50 = mean(estimate), 
+            mean_lwr = mean(boot_2_5_percent), 
+            mean_upr = mean(boot_97_5_percent))
+```
+
+```{r}
+ABMA_high_shade_seedling <- vc_all2 %>% 
+  filter((tree %in% c("136.1")))
+  
+ABMA_high_shade_seedling <- ABMA_high_shade_seedling %>%
+  mutate(k = format(k, scientific = FALSE),  # Ensure 'k' is formatted as non-scientific
+         valid_data = ifelse(plc_new >= 0, TRUE, FALSE))  
+ABMA_high_shade_seedling <- ABMA_high_shade_seedling %>% filter(valid_data == TRUE)
+
+# Fit the model using only rows where plc_new >= 0
+pfit <- fitplcs(ABMA_high_shade_seedling, "tree", varnames = c(PLC = "plc_new", WP = "mpa"), nboot = 5)
+
+
+coef(pfit)
+plot(pfit,
+     onepanel = T, 
+     plotci = F, 
+     pxlinecol = "black",
+     main = "ABMA high elevation, shaded seedling",
+     legend = FALSE)
+
+coef(pfit) %>% 
+  clean_names() %>% 
+  filter(parameter == "PX") %>%
+  summarise(mean_P50 = mean(estimate), 
+            mean_lwr = mean(boot_2_5_percent), 
+            mean_upr = mean(boot_97_5_percent))
+```
+
+```{r}
+ABMA_high_sun_sapling <-vc_all2 %>% 
+  filter((tree %in% c("273.2", "233.1","290.1")))
+
+ABMA_high_sun_sapling <- ABMA_high_sun_sapling %>%
+  mutate(k = format(k, scientific = FALSE),  # Ensure 'k' is formatted as non-scientific
+         valid_data = ifelse(plc_new >= 0, TRUE, FALSE))  
+ABMA_high_sun_sapling <- ABMA_high_sun_sapling %>% filter(valid_data == TRUE)
+
+# Fit the model using only rows where plc_new >= 0
+pfit <- fitplcs(ABMA_high_sun_sapling, "tree", varnames = c(PLC = "plc_new", WP = "mpa"), nboot = 5)
+
+coef(pfit)
+plot(pfit,
+     onepanel = T, 
+     plotci = F, 
+     pxlinecol = "black",
+     main = "ABMA high elevation, sun exposed sapling",
+     legend = FALSE)
+
+coef(pfit) %>% 
+  clean_names() %>% 
+  filter(parameter == "PX") %>%
+  summarise(mean_P50 = mean(estimate), 
+            mean_lwr = mean(boot_2_5_percent), 
+            mean_upr = mean(boot_97_5_percent))
+
+```
+
+```{r}
+ABMA_high_shade_sapling <-vc_all2 %>% 
+  filter(tree %in% c("280.2"))
+
+ABMA_high_shade_sapling <- ABMA_high_shade_sapling %>%
+  mutate(k = format(k, scientific = FALSE),  # Ensure 'k' is formatted as non-scientific
+         valid_data = ifelse(plc_new >= 0, TRUE, FALSE))  
+ABMA_high_shade_sapling <- ABMA_high_shade_sapling %>% filter(valid_data == TRUE)
+
+# Fit the model using only rows where plc_new >= 0
+pfit <- fitplcs(ABMA_high_shade_sapling, "tree", varnames = c(PLC = "plc_new", WP = "mpa"), nboot = 5)
+
+coef(pfit)
+plot(pfit,
+     onepanel = T, 
+     plotci = F, 
+     pxlinecol = "black",
+     main = "ABMA high elevation, shaded sapling",
+     legend = FALSE)
+
+coef(pfit) %>% 
+  clean_names() %>% 
+  filter(parameter == "PX") %>%
+  summarise(mean_P50 = mean(estimate), 
+            mean_lwr = mean(boot_2_5_percent), 
+            mean_upr = mean(boot_97_5_percent))
+```
 
