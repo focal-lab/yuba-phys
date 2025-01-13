@@ -22,7 +22,7 @@ library('ggplot2')
 
 Size distributions of seedlings and saplings
 
-{r, echo = FALSE, message = FALSE, warning = FALSE}
+```{r, echo = FALSE, message = FALSE, warning = FALSE}
 ggplot(trait_data1, aes(x = DBH_complete, fill = size_class)) +
   geom_histogram(binwidth = 0.5, position = "dodge", alpha = 0.7, color = "black") +
   labs( 
@@ -34,6 +34,7 @@ ggplot(trait_data1, aes(x = DBH_complete, fill = size_class)) +
     panel.grid.major = element_blank(), 
     panel.grid.minor = element_blank())
 
+```
 
 Distribution of seedlings and saplings across light environments
 ```{r, echo = FALSE, message = FALSE, warning = FALSE}
@@ -48,12 +49,6 @@ ggplot(trait_data1, aes(x = DBH_complete, y = percent_cover, color = species)) +
   theme(
     panel.grid.major = element_blank(), 
     panel.grid.minor = element_blank())
-
-# Update rmarkdown
-install.packages("rmarkdown")
-
-# Update xfun
-install.packages("xfun")
 
 ```
 
@@ -72,28 +67,20 @@ ggplot(trait_data1, aes(x = elevation, y = percent_cover, fill = microsite)) +
     panel.grid.minor = element_blank())+
   scale_fill_manual(values = c("skyblue", "lightgreen", "purple"))
 
-
 # Create a new variable combining size_class and elevation
 trait_data1$size_elevation <- interaction(trait_data1$size_class, trait_data1$elevation)
 
-# Create the plot
+
 ggplot(trait_data1, aes(x = species, y = percent_cover)) +
-  # Create one boxplot for canopy closure by species
   geom_boxplot(alpha = 0.5, outlier.size = 3, outlier.colour = "black") +
-  
-  # Add points, color-coded by the combination of size and elevation
   geom_point(aes(color = size_elevation), 
              position = position_jitter(width = 0.2, height = 0), 
              alpha = 0.7, size = 3) +
-  
-  # Axis labels
   labs(
     y = "Canopy closure", 
     x = "Species",
-    color = "Size & Elevation"  # Label for the combined legend
+    color = "Size & Elevation"  
   ) +
-  
-  # Clean theme
   theme_bw() +
   theme(
     panel.grid.major = element_blank(), 
@@ -101,27 +88,17 @@ ggplot(trait_data1, aes(x = species, y = percent_cover)) +
   )
 
 
-
-# Create the plot
 ggplot(trait_data1, aes(x = microsite, y = percent_cover)) +
-  # Create one boxplot for each microsite level
   geom_boxplot(alpha = 0.5, outlier.size = 3, outlier.colour = "black") +
-  
-  # Add points, color-coded by the combination of size and elevation
   geom_point(aes(color = size_elevation), 
              position = position_jitter(width = 0.2, height = 0), 
              alpha = 0.7, size = 3) +
-  
-  # Axis labels
   labs(
     y = "Canopy closure", 
     x = "Microsite level", 
-    color = "Size & Elevation"  # Label for the combined legend
+    color = "Size & Elevation"  
   ) +
-  # Facet by species: create a separate plot for each species
   facet_wrap(~ species, scales = "free_y") +
-  
-  # Clean theme
   theme_bw() +
   theme(
     panel.grid.major = element_blank(), 
@@ -144,14 +121,90 @@ ggplot(trait_data1, aes(x = elevation, y = stand_basal_area, fill = elevation)) 
     panel.grid.major = element_blank(), 
     panel.grid.minor = element_blank())+
   scale_fill_manual(values = c("skyblue", "lightgreen", "purple"))
+
+
+
+ggplot(trait_data1, aes(x = species, y = stand_basal_area)) +
+  geom_boxplot(alpha = 0.5, outlier.size = 3, outlier.colour = "black") +
+  geom_point(aes(color = size_elevation), 
+             position = position_jitter(width = 0.2, height = 0), 
+             alpha = 0.7, size = 3) +
+  labs(
+    y = "Stand Basal Area ", 
+    x = "Species",
+    color = "Size & Elevation"
+  ) +
+  theme_bw() +
+  theme(
+    panel.grid.major = element_blank(), 
+    panel.grid.minor = element_blank()
+  )
+
+
+ggplot(trait_data1, aes(x = microsite, y = stand_basal_area)) +
+  geom_boxplot(alpha = 0.5, outlier.size = 3, outlier.colour = "black") +
+  geom_point(aes(color = size_elevation), 
+             position = position_jitter(width = 0.2, height = 0), 
+             alpha = 0.7, size = 3) +
+  labs(
+    y = "Stand Basal Area", 
+    x = "Microsite level", 
+    color = "Size & Elevation" 
+  ) +
+  facet_wrap(~ species, scales = "free_y") +
+  
+  theme_bw() +
+  theme(
+    panel.grid.major = element_blank(), 
+    panel.grid.minor = element_blank()
+  )
+
 ```
+
+
+```{r}
+
+ggplot(data = trait_data1, aes(x = DBH_complete, y = midday_MPa, color = species)) +
+  geom_smooth(method = "lm", se = TRUE, size = 1.2, alpha = 0.7) +
+  labs(
+    x = "Diameter at root collar (cm)", 
+    y = "Midday Water Potential (-MPa)", 
+    color = "Species" 
+  ) +
+  
+  theme_bw() +
+  scale_color_manual(values = c("red", "blue", "green", "purple")) + 
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank()
+  )
+
+
+ggplot(data = trait_data1, aes(x = DBH_complete, y = midday_MPa, color = species, linetype = microsite)) +
+  geom_smooth(method = "lm", se = TRUE, size = 1.2, alpha = 0.7) +
+  labs(
+    x = "Diameter at root collar (cm)", 
+    y = "Midday Water Potential (-MPa)", 
+    color = "Species",  
+    linetype = "Microsite"  
+  ) +
+  theme_bw() +
+  scale_color_manual(values = c("ABCO" = "blue", "PIPO" = "green", "ABMA" = "red", "PILA" = "purple")) + 
+  scale_linetype_manual(values = c("sun" = "dotted", "shade" = "solid", "int" = "twodash")) + 
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank()
+  )
+
+```
+
 
 Do seedlings and saplings differ in predawn and midday water potentials across elevation?
 
 ```{r}
 ggplot(trait_data1, aes(x = DBH_complete, y = predawn_MPa, color = species)) +
-  geom_point(size = 3) +                # Adds scatter plot points
-  geom_smooth(method = "lm", se = FALSE, aes(group = species), linetype = "solid") +  # Add regression lines
+  geom_point(size = 3) +                
+  geom_smooth(method = "lm", se = FALSE, aes(group = species), linetype = "solid") +  
   labs(
     title = "Predawn Water Potential by Tree Diameter",
     x = "Diameter at root collar (cm)",
