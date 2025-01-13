@@ -164,11 +164,11 @@ ggplot(trait_data1, aes(x = microsite, y = stand_basal_area)) +
 
 ```{r}
 
-ggplot(data = trait_data1, aes(x = DBH_complete, y = midday_MPa, color = species)) +
-  geom_smooth(method = "lm", se = TRUE, size = 1.2, alpha = 0.7) +
+ggplot(data = trait_data1, aes(x = DBH_complete, y = predawn_MPa, color = species)) +
+  geom_smooth(method = "lm", se = FALSE, size = 1.2, alpha = 0.7) +
   labs(
     x = "Diameter at root collar (cm)", 
-    y = "Midday Water Potential (-MPa)", 
+    y = "Predawn Water Potential (-MPa)", 
     color = "Species" 
   ) +
   
@@ -180,22 +180,49 @@ ggplot(data = trait_data1, aes(x = DBH_complete, y = midday_MPa, color = species
   )
 
 
-ggplot(data = trait_data1, aes(x = DBH_complete, y = midday_MPa, color = species, linetype = microsite)) +
-  geom_smooth(method = "lm", se = TRUE, size = 1.2, alpha = 0.7) +
+ggplot(data = trait_data1, aes(x = DBH_complete, y = midday_MPa, color = species, linetype = elevation)) +
+  geom_smooth(method = "lm", se = FALSE, size = 1.2, alpha = 0.7) +
   labs(
     x = "Diameter at root collar (cm)", 
     y = "Midday Water Potential (-MPa)", 
     color = "Species",  
-    linetype = "Microsite"  
+    linetype = ""  
   ) +
   theme_bw() +
   scale_color_manual(values = c("ABCO" = "blue", "PIPO" = "green", "ABMA" = "red", "PILA" = "purple")) + 
-  scale_linetype_manual(values = c("sun" = "dotted", "shade" = "solid", "int" = "twodash")) + 
+  scale_linetype_manual(values = c("low" = "dotted", "high" = "solid")) + 
+  scale_y_reverse() + 
   theme(
     panel.grid.major = element_blank(),
     panel.grid.minor = element_blank()
   )
 
+
+trait_data2 <- trait_data1 %>%
+  # Create predawn data
+  mutate(time_of_day = "predawn", water_potential = predawn_MPa) %>%
+  bind_rows(
+    # Create midday data
+    trait_data1 %>%
+      mutate(time_of_day = "midday", water_potential = midday_MPa)
+  )
+
+
+ggplot(data = trait_data2, aes(x = DBH_complete, y = water_potential, color = species, linetype = time_of_day)) +
+  geom_smooth(method = "lm", se = FALSE, size = 1.2, alpha = 0.7) +
+  labs(
+    x = "Diameter at root collar (cm)", 
+    y = "Water Potential (-MPa)", 
+    color = "Species",  
+    linetype = "Time of Day") +
+  theme_bw() +
+  scale_color_manual(values = c("ABCO" = "blue", "PIPO" = "green", "ABMA" = "red", "PILA" = "purple")) + 
+  scale_linetype_manual(values = c("predawn" = "dotted", "midday" = "solid")) +
+  scale_y_reverse() +  # Reverse y-axis for water potential
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank()
+  )
 ```
 
 
@@ -415,7 +442,7 @@ PILA <- trait_data1[trait_data1$species == 'PILA',]
 PIPO <- trait_data1[trait_data1$species == 'PIPO',]
 ABMA <- trait_data1[trait_data1$species == 'ABMA',]
 
-mod7<- lmer(ABCO$midday_MPa~ microsite + size_class + microsite:size_class + (1|plot), REML = TRUE, data = ABCO)
+mod7<- lmer(ABMA$midday_MPa~ elevation + size_class + elevation:size_class + (1|plot), REML = TRUE, data = ABMA)
 summary(mod7)
 
 ```
