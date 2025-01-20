@@ -45,7 +45,6 @@ missing_heights_by_species <- trait_data1 %>%
     .groups = 'drop'
   )
 
-library(dplyr)
 
 # counts by height intervals 
 library(dplyr)
@@ -67,7 +66,6 @@ height_intervals <- trait_data1 %>%
 
 hist(trait_data1$seedling_height_cm)
 
-library(dplyr)
 
 # create DBH intervals and count DBH by species and elevation
 DBH_intervals <- trait_data1 %>%
@@ -86,7 +84,7 @@ DBH_intervals <- trait_data1 %>%
 
 trait_data1$DBH <- as.numeric(as.character(trait_data1$DBH_cm))
 
-hist(trait_data1$DBH_cm)
+hist(trait_data1$DBH)
 
 # make a table to visualize the representation of vulnerability curves across species, 
 #size class, elevation and microsite
@@ -116,7 +114,6 @@ missing_cases <- trait_data1 %>% filter(is.na(DBH))
 mod2 <- lm(DBH ~ seedling_height_cm, data = complete_cases)
 summary(mod2) # r^2 decreased when filtering to <= 100cm
 
-
 trait_data1$predicted_DBH <- NA
 
 if (nrow(missing_cases) > 0) {
@@ -139,7 +136,16 @@ ggplot(trait_data1, aes(x = seedling_height_cm, y = DBH)) +
     panel.grid.major = element_blank(),
     panel.grid.minor = element_blank())
 
+# are predicted and observed DBH values statistically different?
+t_test <- t.test(
+  trait_data1$DBH[!is.na(trait_data1$DBH) & !is.na(trait_data1$predicted_DBH)],
+  trait_data1$predicted_DBH[!is.na(trait_data1$DBH) & !is.na(trait_data1$predicted_DBH)],
+  paired = TRUE
+)
+print(t_test)
+
 # preliminary analyses
+write.csv(trait_data1, "trait_data1.csv", row.names = FALSE)
 
 # do predawn and midday water potentials differ by microsite, species, and elevation?
 ggplot(trait_data1, aes(x = microsite, y = midday_MPa, fill = species)) +
@@ -171,6 +177,20 @@ ggplot(trait_data1, aes(x = microsite, y = predawn_MPa, fill = species)) +
 
 # high elevation plots are oddly more dry, could this be because of stand basal area or 
 # heat load index ?
+
+t_test <- t.test(midday_MPa ~ elevation, data = trait_data1)
+print(t_test)
+# midday water potential is not different between elevations
+# predawn water potential is different between elevations, could this be skewed by a 
+# late August rain, plots 1 & 2 were measured ~5 days after this rain, lets see if 
+# removing these two plots changes our results
+
+t_test <- t.test(predawn_MPa ~ elevation, 
+                        data = trait_data1 %>% filter(!plot %in% c(1, 2)))
+print(t_test)
+
+# removing plots 1 & 2 results in there being no difference in predawn WP across elevations
+
 plot(trait_data1$midday_MPa~trait_data1$stand_basal_area)
 
 # what about differences between size classes?
@@ -222,9 +242,40 @@ print(shapiro_test)
 # data are close to normally distributed but with weak significance for
 # both predawn and midday WP measurements 
 
+# check for homogeneity of variances using Levene's test or Bartlett's test. 
+# if the variances across groups are similar, you can confidently use ANOVA.
+
+install.packages("car")
+library(car)
+
+levene_test <- leveneTest(midday_MPa ~ elevation * species, data = trait_data1)
+print(levene_test)
+
+# The F statistic measures the ratio of variance between the groups to the variance 
+# within the groups. A larger F value indicates greater variance between groups 
+# compared to within groups.
 
 # proceeding with a parametric ANOVA to test differences in mean WP between groups
-# will revisit whether non-parametric is more appropriate
+# will revisit whether non-parametric (Kruskal-Wallis Test) is more appropriate
+
+anova <- aov(midday_MPa ~ species * size_class * elevation, 
+             data = trait_data1)
+summary(anova)
+
+mod3 <- lm(midday_MPa ~ species * size_class * elevation, 
+             data = trait_data1)
+summary(mod3)
+
+
+# we can also use generalized linear models (GLMs) if trait data (response variable) 
+# is not normally distributed
+
+# fit a glm
+glm_model <- glm(midday_MPa ~ species * size_class * elevation * microsite, 
+                       data = trait_data1 %>% drop_na(midday_MPa, species, size_class, 
+                                                      elevation, microsite), 
+                       family = gamma(link = "log"))
+summary(glm_model)
 
 
 # generate a heat load index to test whether heat load index explains variation in WP 
