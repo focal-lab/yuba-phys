@@ -17,13 +17,17 @@ library('tinytex')
 library('dplyr')
 library('tidyverse')
 library('ggplot2')
+install.packages("emmeans")
+install.packages("lme4")
+library(emmeans)
+library(lme4)
 
 ```
 
 Size distributions of seedlings and saplings
 
 ```{r, echo = FALSE, message = FALSE, warning = FALSE}
-ggplot(trait_data1, aes(x = DBH_complete, fill = size_class)) +
+ggplot(trait_data1, aes(x = DBH_complete, fill = size)) +
   geom_histogram(binwidth = 0.5, position = "dodge", alpha = 0.7, color = "black") +
   labs( 
        x = "Diameter at root collar (cm)", 
@@ -33,6 +37,12 @@ ggplot(trait_data1, aes(x = DBH_complete, fill = size_class)) +
   theme(
     panel.grid.major = element_blank(), 
     panel.grid.minor = element_blank())
+
+# create a new column for size that categorizes individuals with diameter at root collar > 2.5 cm as saplings and individuals with diameter at root collar < 2.5 cm seedlings
+
+trait_data1 <- trait_data1 %>%
+  mutate(size = ifelse(DBH_complete < 2.5, "seedling", "sapling"))
+
 
 ```
 
@@ -68,7 +78,7 @@ ggplot(trait_data1, aes(x = elevation, y = percent_cover, fill = microsite)) +
   scale_fill_manual(values = c("skyblue", "lightgreen", "purple"))
 
 # Create a new variable combining size_class and elevation
-trait_data1$size_elevation <- interaction(trait_data1$size_class, trait_data1$elevation)
+trait_data1$size_elevation <- interaction(trait_data1$size, trait_data1$elevation)
 
 
 ggplot(trait_data1, aes(x = species, y = percent_cover)) +
@@ -163,30 +173,13 @@ ggplot(trait_data1, aes(x = microsite, y = stand_basal_area)) +
 
 
 ```{r}
-
-ggplot(data = trait_data1, aes(x = DBH_complete, y = predawn_MPa, color = species)) +
+p2 <- ggplot(data = trait_data1, aes(x = DBH_complete, y = predawn_MPa, color = species, linetype = elevation)) +
   geom_smooth(method = "lm", se = FALSE, size = 1.2, alpha = 0.7) +
   labs(
     x = "Diameter at root collar (cm)", 
     y = "Predawn Water Potential (-MPa)", 
-    color = "Species" 
-  ) +
-  
-  theme_bw() +
-  scale_color_manual(values = c("red", "blue", "green", "purple")) + 
-  theme(
-    panel.grid.major = element_blank(),
-    panel.grid.minor = element_blank()
-  )
-
-
-ggplot(data = trait_data1, aes(x = DBH_complete, y = midday_MPa, color = species, linetype = elevation)) +
-  geom_smooth(method = "lm", se = FALSE, size = 1.2, alpha = 0.7) +
-  labs(
-    x = "Diameter at root collar (cm)", 
-    y = "Midday Water Potential (-MPa)", 
     color = "Species",  
-    linetype = ""  
+    linetype = "Elevation"  
   ) +
   theme_bw() +
   scale_color_manual(values = c("ABCO" = "blue", "PIPO" = "green", "ABMA" = "red", "PILA" = "purple")) + 
@@ -196,6 +189,10 @@ ggplot(data = trait_data1, aes(x = DBH_complete, y = midday_MPa, color = species
     panel.grid.major = element_blank(),
     panel.grid.minor = element_blank()
   )
+
+mod1 <- lm(trait_data1$predawn_MPa~trait_data1$DBH_complete)
+plot(trait_data1$DBH_complete, trait_data1$predawn_MPa, xlab="Diameter at root collar", ylab="Predawn water potential")
+curve (coef(mod1)[1] + coef(mod1)[2]*x, add=TRUE) ## plotting the fitted regression line from the linear model rather than ggplot
 
 
 trait_data2 <- trait_data1 %>%
@@ -208,7 +205,7 @@ trait_data2 <- trait_data1 %>%
   )
 
 
-ggplot(data = trait_data2, aes(x = DBH_complete, y = water_potential, color = species, linetype = time_of_day)) +
+p1 <- ggplot(data = trait_data2, aes(x = DBH_complete, y = water_potential, color = species, linetype = time_of_day)) +
   geom_smooth(method = "lm", se = FALSE, size = 1.2, alpha = 0.7) +
   labs(
     x = "Diameter at root collar (cm)", 
@@ -223,6 +220,57 @@ ggplot(data = trait_data2, aes(x = DBH_complete, y = water_potential, color = sp
     panel.grid.major = element_blank(),
     panel.grid.minor = element_blank()
   )
+
+p3 <- ggplot(data = trait_data2, aes(x = DBH_complete, y = predawn_MPa, color = species, linetype = microsite)) +
+  geom_smooth(method = "lm", se = FALSE, size = 1.2, alpha = 0.7) +
+  labs(
+    x = "Diameter at root collar (cm)", 
+    y = "Predawn Water Potential (-MPa)", 
+    color = "Species",  
+    linetype = "Microsite") +
+  theme_bw() +
+  scale_color_manual(values = c("ABCO" = "blue", "PIPO" = "green", "ABMA" = "red", "PILA" = "purple")) + 
+  scale_linetype_manual(values = c("sun" = "dotted", "int" = "twodash", "shade" = "solid")) +
+  scale_y_reverse() +  # Reverse y-axis for water potential
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank()
+  )
+
+p4 <- ggplot(data = trait_data2, aes(x = DBH_complete, y = midday_MPa, color = species, linetype = elevation)) +
+  geom_smooth(method = "lm", se = FALSE, size = 1.2, alpha = 0.7) +
+  labs(
+    x = "Diameter at root collar (cm)", 
+    y = "Midday Water Potential (-MPa)", 
+    color = "Species",  
+    linetype = "Elevation") +
+  theme_bw() +
+  scale_color_manual(values = c("ABCO" = "blue", "PIPO" = "green", "ABMA" = "red", "PILA" = "purple")) + 
+  scale_linetype_manual(values = c("low" = "dotted", "high" = "solid")) + 
+  scale_y_reverse() +  # Reverse y-axis for water potential
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank()
+  )
+p5 <- ggplot(data = trait_data2, aes(x = DBH_complete, y = midday_MPa, color = species, linetype = microsite)) +
+  geom_smooth(method = "lm", se = FALSE, size = 1.2, alpha = 0.7) +
+  labs(
+    x = "Diameter at root collar (cm)", 
+    y = "Midday Water Potential (-MPa)", 
+    color = "Species",  
+    linetype = "Microsite") +
+  theme_bw() +
+  scale_color_manual(values = c("ABCO" = "blue", "PIPO" = "green", "ABMA" = "red", "PILA" = "purple")) + 
+  scale_linetype_manual(values = c("sun" = "dotted", "int" = "twodash", "shade" = "solid")) +
+  scale_y_reverse() +  # Reverse y-axis for water potential
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank()
+  )
+
+install.packages("gridExtra")
+library(gridExtra)
+grid.arrange(p2, p4, p3, p4, p1, nrow = 3, ncol = 2)
 ```
 
 
@@ -246,7 +294,7 @@ ggplot(trait_data1, aes(x = DBH_complete, y = predawn_MPa, color = species)) +
 
 ```{r, echo = FALSE, message = FALSE, warning = FALSE}
 
-ggplot(trait_data1, aes(x = size_class, y = predawn_MPa, fill = species)) +
+ggplot(trait_data1, aes(x = size, y = predawn_MPa, fill = species)) +
   geom_boxplot(position = position_dodge(0.8), outlier.shape = NA) +  
   facet_wrap(~ elevation) +
   labs(
@@ -428,7 +476,7 @@ ggplot(trait_data1, aes(x = microsite, y = midday_MPa, fill = species)) +
 ```
 
 ```{r}
-mod6 <- lm(midday_MPa ~ species * microsite * elevation, 
+mod6 <- lm(elevation ~ species + microsite + elevation, 
              data = trait_data1)
 summary(mod6)
 ```
@@ -442,10 +490,76 @@ PILA <- trait_data1[trait_data1$species == 'PILA',]
 PIPO <- trait_data1[trait_data1$species == 'PIPO',]
 ABMA <- trait_data1[trait_data1$species == 'ABMA',]
 
-mod7<- lmer(ABMA$midday_MPa~ elevation + size_class + elevation:size_class + (1|plot), REML = TRUE, data = ABMA)
+ABCO_cleaned_data <- ABCO[!is.na(ABCO$DBH_complete) & !is.na(ABCO$percent_cover) & !is.na(ABCO$y), ]
+ABCO_cleaned_data <- ABCO[!is.na(ABCO$DBH_complete) & !is.na(ABCO$percent_cover), ]
+
+
+mod7<- lmer(PIPO$midday_MPa~ percent_cover + DBH_complete + stand_basal_area + elevation +  DBH_complete:percent_cover + DBH_complete:elevation + (1|plot), REML = TRUE, data = PIPO)
 summary(mod7)
 
+# Get the fitted values (predicted values) from the model
+fitted_values <- fitted(mod7)
+
+# Create a new dataframe with predictors and fitted values
+fitted_data <- data.frame(DBH = ABCO_cleaned_data$DBH_complete, 
+                        percent_closure = ABCO_cleaned_data$percent_cover, 
+                        fitted_values = fitted_values)
+
+library(ggplot2)
+ggplot(plot_data, aes(x = x1, y = fitted_values, color = x2)) +
+  geom_line() +  # Fit line
+  geom_point(data = your_data, aes(x = x1, y = y), color = "red", alpha = 0.5) +  # Raw data as points
+  labs(title = "Fitted Values from Linear Mixed Model",
+       x = "Predictor 1 (x1)", y = "Fitted Values (y)") +
+  scale_color_gradient(low = "blue", high = "red") +  # Color gradient for x2
+  theme_minimal()
+
+# Create a new dataframe that excludes species ABMA to look at elevation
+trait_data2 <- trait_data1[trait_data1$species != "ABMA", ]
+
+mod8<- lm(trait_data2$elev_band_ft ~ stand_basal_area + species + percent_cover + stand_basal_area:species + percent_cover:species, data = trait_data2)
+summary(mod8) 
+
+# Compute estimated marginal means for percent_cover
+emm_percent_cover <- emmeans(mod7, ~ percent_cover)
+
+# Compute estimated marginal means for DBH_complete (with percent_cover held constant)
+emm_DBH <- emmeans(mod7, ~ DBH_complete)
+
+# Alternatively, for interaction, you can compute both percent_cover and DBH_complete effects together
+emm_interaction <- emmeans(mod7, ~ microsite * size)
+summary(emm_interaction)
+emm_result_df <- as.data.frame(emm_interaction)
+
+# Plot the effect of percent_cover on midday_MPa
+ggplot(emm_percent_cover, aes(x = percent_cover, y = emmean, ymin = lower.CL, ymax = upper.CL)) +
+  geom_point() +
+  geom_errorbar(width = 0.2) +  # Add error bars for confidence intervals
+  labs(x = "Percent Cover", y = "Estimated Marginal Mean of Midday MPa") +
+  theme_minimal() +
+  ggtitle("Effect of Percent Cover on Midday MPa")
+
+# Plot the interaction between percent_cover and DBH_complete
+ggplot(emm_result_df, aes(x = size, y = emmean, color = microsite)) +
+  geom_line() + 
+  geom_ribbon(aes(ymin = lower.CL, ymax = upper.CL, fill = microsite), alpha = 0.3) + 
+  labs(x = "size", y = "Estimated Marginal Mean of Midday MPa") +
+  #scale_color_viridis_c() +  # Color scale for percent_cover
+  #scale_fill_viridis_c() +  # Color scale for the ribbon fill
+  theme_minimal() +
+  ggtitle("Interaction effect between microsite and size on midday WP")
+
+# Inspect the structure of your emm_result_df
+str(emm_result_df)
+
+# Check the first few rows of the dataframe
+head(emm_result_df)
+
+# Summary statistics to see if values are within expected ranges
+summary(emm_result_df)
+
 ```
+
 
 # turning linear models into fitted models 
 # run your lm() or gml() model
