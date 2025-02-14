@@ -190,7 +190,13 @@ p2 <- ggplot(data = trait_data1, aes(x = DBH_complete, y = predawn_MPa, color = 
     panel.grid.minor = element_blank()
   )
 
-mod1 <- lm(trait_data1$predawn_MPa~trait_data1$DBH_complete)
+mod1 <- lm(predawn_MPa~DBH_complete + elevation, data = trait_data1)
+colors <- ifelse (trait_data1$elevation=='low', "black", "gray")
+plot (trait_data1$DBH_complete, trait_data1$predawn_MPa, xlab="Diameter at root collar", ylab="Predawn water potential",
+col=colors, pch=20)
+curve (cbind (1, 1, x) %*% coef(mod1), add=TRUE, col="black")
+curve (cbind (1, 0, x) %*% coef(mod1), add=TRUE, col="gray")
+
 plot(trait_data1$DBH_complete, trait_data1$predawn_MPa, xlab="Diameter at root collar", ylab="Predawn water potential")
 curve (coef(mod1)[1] + coef(mod1)[2]*x, add=TRUE) ## plotting the fitted regression line from the linear model rather than ggplot
 
@@ -482,6 +488,35 @@ summary(mod6)
 ```
 
 ```{r}
+# Create a correlation matrix for environmental variables
+cor_matrix <- cor(trait_data1[, c("percent_cover", "elev_band_ft", "stand_basal_area")], use = "pairwise.complete.obs")
+print(cor_matrix)
+
+install.packages("ggcorrplot") 
+library(ggcorrplot)
+library(corrplot)
+
+# Create a custom set of axis labels (modify as per your needs)
+custom_labels <- c("Canopy Closure", "Elevation (ft)", "Stand Basal Area")
+
+colnames(cor_matrix) <- custom_labels
+rownames(cor_matrix) <- custom_labels
+
+# Visualize the correlation matrix with custom axis labels
+corrplot(cor_matrix, 
+         method = "color",          # Color-based visualization
+         type = "lower",            # Show only the lower triangle
+         order = "hclust",          # Order the variables based on hierarchical clustering
+         addCoef.col = "black",     # Add the correlation values in black color
+         tl.col = "black",          # Color of the labels on the axes
+         tl.srt = 45,               # Rotate the axis labels by 45 degrees
+         tl.labels = custom_labels, # Custom axis labels
+         title = "Correlation Plot"
+)
+
+```
+
+```{r}
 library(lme4)
 library(lmerTest)
 
@@ -490,11 +525,13 @@ PILA <- trait_data1[trait_data1$species == 'PILA',]
 PIPO <- trait_data1[trait_data1$species == 'PIPO',]
 ABMA <- trait_data1[trait_data1$species == 'ABMA',]
 
+
+trait_data1$stand_basal_area
 ABCO_cleaned_data <- ABCO[!is.na(ABCO$DBH_complete) & !is.na(ABCO$percent_cover) & !is.na(ABCO$y), ]
 ABCO_cleaned_data <- ABCO[!is.na(ABCO$DBH_complete) & !is.na(ABCO$percent_cover), ]
 
 
-mod7<- lmer(PIPO$midday_MPa~ percent_cover + DBH_complete + stand_basal_area + elevation +  DBH_complete:percent_cover + DBH_complete:elevation + (1|plot), REML = TRUE, data = PIPO)
+mod7<- lmer(ABCO$predawn_MPa~ percent_cover + DBH_complete + stand_basal_area + elevation + (1|plot), REML = TRUE, data = ABCO)
 summary(mod7)
 
 # Get the fitted values (predicted values) from the model
