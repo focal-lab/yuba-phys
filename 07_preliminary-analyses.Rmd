@@ -17,8 +17,6 @@ library('tinytex')
 library('dplyr')
 library('tidyverse')
 library('ggplot2')
-install.packages("emmeans")
-install.packages("lme4")
 library(emmeans)
 library(lme4)
 
@@ -492,9 +490,13 @@ summary(mod6)
 cor_matrix <- cor(trait_data1[, c("percent_cover", "elev_band_ft", "stand_basal_area")], use = "pairwise.complete.obs")
 print(cor_matrix)
 
+cor(trait_data1$elev_band_ft, trait_data1$stand_basal_area, method = "pearson")
+cor.test(trait_data1$stand_basal_area, trait_data1$percent_cover, method="pearson")
+
 install.packages("ggcorrplot") 
 library(ggcorrplot)
 library(corrplot)
+library("ggpubr")
 
 # Create a custom set of axis labels (modify as per your needs)
 custom_labels <- c("Canopy Closure", "Elevation (ft)", "Stand Basal Area")
