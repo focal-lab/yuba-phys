@@ -321,13 +321,35 @@ summary(mod1)
 ```
 
 ```{r, echo = FALSE, message = FALSE, warning = FALSE}
-ggplot(trait_data1, aes(x = size_class, y = midday_MPa, fill = species)) +
+ggplot(trait_data1, aes(x = size_class, y = predawn_MPa, fill = species)) +
   geom_boxplot(position = position_dodge(0.8), outlier.shape = NA) +  
-  facet_wrap(~ elevation) +
+  #facet_wrap(~ microsite) +
+  labs(
+    x = "Size",
+    y = "Predawn Water Potential (-MPa)",
+    fill = "Species") +
+  scale_fill_manual(values = c("ABCO" = "blue", "PIPO" = "green", "ABMA" = "red", "PILA" = "purple")) + 
+  scale_y_reverse() +  # Reverse the y-axis
+  theme_bw() +
+  theme(
+    panel.grid.major = element_blank(), 
+    panel.grid.minor = element_blank())
+
+library(dplyr)
+
+# Remove rows with NA values in 'microsite'
+trait_data1_microsite <- trait_data1 %>%
+  filter(!is.na(microsite))
+
+# Create the plot
+ggplot(trait_data1_microsite, aes(x = size_class, y = midday_MPa, fill = species)) +
+  geom_boxplot(position = position_dodge(0.8), outlier.shape = NA) +  
+  facet_wrap(~ microsite) +
   labs(
     x = "Size",
     y = "Midday Water Potential (-MPa)",
     fill = "Species") +
+  scale_fill_manual(values = c("ABCO" = "blue", "PIPO" = "green", "ABMA" = "red", "PILA" = "purple")) + 
   scale_y_reverse() +  # Reverse the y-axis
   theme_bw() +
   theme(
@@ -393,13 +415,16 @@ summary(mod4)
 
 Do predawn and midday water potentials differ across elevation?
 ```{r, echo = FALSE, message = FALSE, warning = FALSE}
-ggplot(trait_data1, aes(x = elevation, y = predawn_MPa, fill = species)) +
+library(ggplot2)
+library(viridis)
+ggplot(trait_data1, aes(x = elevation, y = midday_MPa, fill = species)) +
   geom_boxplot(position = position_dodge(0.8), outlier.shape = NA) +  
   labs(
     x = "Elevation",
-    y = "Predawn Water Potential (-MPa)",
+    y = "Midday Water Potential (-MPa)",
     fill = "Species") +
   scale_y_reverse() +  # Reverse the y-axis
+  scale_fill_viridis(discrete = TRUE) + 
   theme_bw() +
   theme(
     panel.grid.major = element_blank(), 
