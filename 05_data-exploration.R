@@ -37,6 +37,12 @@ low_elev_counts <- summary_table %>%
 high_elev_counts <- summary_table %>%
   filter(elevation %in% c('high'))
 
+# counts for midday measurements 
+midday_summary_table <- trait_data1 %>%
+  filter(!is.na(midday_MPa)) %>%  # Only include rows where midday_MPa has data
+  group_by(elevation, microsite, size_class, species) %>%
+  summarise(count = n())
+
 ## create a table to summarize missing data
 missing_heights_by_species <- trait_data1 %>%
   group_by(species, elevation) %>%
