@@ -38,8 +38,6 @@ library(quickpsy)
 library(fitplc)
 library(dplyr)
 
-install.packages('fitplc')
-library(fitplc)
 ```
 
 ```{r}
@@ -166,8 +164,11 @@ PILA_low_sun_seedling <- PILA_low_sun_seedling %>%
 
 PILA_low_sun_seedling <- PILA_low_sun_seedling %>% filter(valid_data == TRUE)
 
+PILA_low_sun_seedling_cleaned <- 
+  PILA_low_sun_seedling %>%  filter(!row_number() %in% c(2, 4, 6, 8, 16, 17, 18, 19, 38, 42, 44, 45, 49, 55, 60, 62, 64, 68))
+
 # Fit the model using only rows where plc_new >= 0
-pfit <- fitplcs(PILA_low_sun_seedling, "tree", varnames = c(PLC = "plc_new", WP = "mpa"), nboot = 5)
+pfit <- fitplcs(PILA_low_sun_seedling_cleaned, "tree", varnames = c(PLC = "plc_new", WP = "mpa"), nboot = 5)
 
 
 coef(pfit)
@@ -176,7 +177,9 @@ plot(pfit,
      plotci = F, 
      pxlinecol = "black",
      main = "PILA low elevation, sun exposed seedling",
-     legend = FALSE)
+     legend = TRUE,
+     xlim = c(0.5, 5.5),
+     ylim = c(0,1))
 
 coef(pfit) %>% 
   clean_names() %>% 
@@ -184,6 +187,10 @@ coef(pfit) %>%
   summarise(mean_P50 = mean(estimate), 
             mean_lwr = mean(boot_2_5_percent), 
             mean_upr = mean(boot_97_5_percent))
+
+#output:   
+#mean_P50 mean_lwr mean_upr
+#3.946345 3.890444 3.994102
 ```
 
 ```{r}
