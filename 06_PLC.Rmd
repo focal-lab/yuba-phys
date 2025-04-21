@@ -986,3 +986,38 @@ coef(pfit) %>%
             mean_upr = mean(boot_97_5_percent))
 ```
 
+
+```{R}
+trait_data1 <- trait_data1 %>%
+  mutate(P50_mean = case_when(
+    size == "seedling" & site == "sun"   & species == "ABCO" & elevation == "high" ~ -3.5,
+    size == "seedling" & site == "shade" & species == "ABCO" & elevation == "high" ~ -3.8,
+    size == "seedling" & site == "sun"   & species == "ABCO" & elevation == "low" ~ -3.5,
+    size == "seedling" & site == "shade" & species == "ABCO" & elevation == "low" ~ -3.8,
+    size == "sapling" & site == "sun"   & species == "ABCO" & elevation == "high" ~ -3.5,
+    size == "sapling" & site == "shade" & species == "ABCO" & elevation == "high" ~ -3.8,
+    size == "sapling" & site == "sun"   & species == "ABCO" & elevation == "low" ~ -3.5,
+    size == "sapling" & site == "shade" & species == "ABCO" & elevation == "low" ~ -3.8,
+    size == "seedling" & site == "sun"   & species == "PILA" & elevation == "high" ~ -3.5,
+    size == "seedling" & site == "shade" & species == "PILA" & elevation == "high" ~ -3.8,
+    size == "seedling" & site == "sun"   & species == "PILA" & elevation == "low" ~ -3.5,
+    size == "seedling" & site == "shade" & species == "PILA" & elevation == "low" ~ -3.8,
+    size == "sapling" & site == "sun"   & species == "PILA" & elevation == "high" ~ -3.5,
+    size == "sapling" & site == "shade" & species == "PILA" & elevation == "high" ~ -3.8,
+    size == "sapling" & site == "sun"   & species == "PILA" & elevation == "low" ~ -3.5,
+    size == "sapling" & site == "shade" & species == "PILA" & elevation == "low" ~ -3.8,
+    size == "seedling" & site == "sun"   & species == "PIPO" & elevation == "high" ~ -3.5,
+    size == "seedling" & site == "shade" & species == "PIPO" & elevation == "high" ~ -3.8,
+    size == "seedling" & site == "sun"   & species == "PIPO" & elevation == "low" ~ -3.5,
+    size == "seedling" & site == "shade" & species == "PIPO" & elevation == "low" ~ -3.8,
+    size == "sapling" & site == "sun"   & species == "PIPO" & elevation == "high" ~ -3.5,
+    size == "sapling" & site == "shade" & species == "PIPO" & elevation == "high" ~ -3.8,
+    size == "sapling" & site == "sun"   & species == "PIPO" & elevation == "low" ~ -3.5,
+    size == "sapling" & site == "shade" & species == "PIPO" & elevation == "low" ~ -3.8,
+    size == "seedling" & site == "sun"   & species == "ABMA" & elevation == "high" ~ -3.5,
+    size == "seedling" & site == "shade" & species == "ABMA" & elevation == "high" ~ -3.8,
+    size == "sapling" & site == "sun"   & species == "ABMA" & elevation == "high" ~ -3.5,
+    size == "sapling" & site == "shade" & species == "ABMA" & elevation == "high" ~ -3.8,
+    TRUE ~ NA_real_  # default value if none of the conditions match
+  ))
+```
