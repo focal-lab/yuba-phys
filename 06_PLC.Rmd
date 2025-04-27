@@ -524,6 +524,10 @@ coef(pfit) %>%
   summarise(mean_P50 = mean(estimate), 
             mean_lwr = mean(boot_2_5_percent), 
             mean_upr = mean(boot_97_5_percent))
+
+# mean_P50 mean_lwr mean_upr
+# 4.587392 4.543307 4.633422
+
 ```
 
 ```{r}
@@ -535,8 +539,13 @@ PIPO_low_sun_sapling <- PIPO_low_sun_sapling %>%
          valid_data = ifelse(plc_new >= 0, TRUE, FALSE))  
 PIPO_low_sun_sapling <- PIPO_low_sun_sapling %>% filter(valid_data == TRUE)
 
+PIPO_low_sun_sapling_cleaned <- 
+  PIPO_low_sun_sapling %>%  filter(!row_number() %in% c(5, 56, 57, 61, 87, 120, 122, 123, 131, 132, 133, 144, 145, 146, 147, 148, 151, 152))
+
+PIPO_low_sun_sapling_cleaned <- PIPO_low_sun_sapling_cleaned[32:161, ]
+
 # Fit the model using only rows where plc_new >= 0
-pfit <- fitplcs(PIPO_low_sun_sapling, "tree", varnames = c(PLC = "plc_new", WP = "mpa"), nboot = 5)
+pfit <- fitplcs(PIPO_low_sun_sapling_cleaned, "tree", varnames = c(PLC = "plc_new", WP = "mpa"), nboot = 5)
 
 coef(pfit)
 plot(pfit,
@@ -544,7 +553,9 @@ plot(pfit,
      plotci = F, 
      pxlinecol = "black",
      main = "PIPO low elevation, sun exposed sapling",
-     legend = FALSE)
+     legend = TRUE,
+     xlim = c(0.5,6.5),
+     ylim = c(0,1))
 
 coef(pfit) %>% 
   clean_names() %>% 
@@ -553,6 +564,8 @@ coef(pfit) %>%
             mean_lwr = mean(boot_2_5_percent), 
             mean_upr = mean(boot_97_5_percent))
 
+# mean_P50 mean_lwr mean_upr
+# 4.244883 4.205137 4.280323
 ```
 
 ```{r}
@@ -564,8 +577,11 @@ PIPO_low_shade_sapling <- PIPO_low_shade_sapling %>%
          valid_data = ifelse(plc_new >= 0, TRUE, FALSE))  
 PIPO_low_shade_sapling <- PIPO_low_shade_sapling %>% filter(valid_data == TRUE)
 
+PIPO_low_shade_sapling_cleaned <- 
+  PIPO_low_shade_sapling %>%  filter(!row_number() %in% c(3, 23))
+
 # Fit the model using only rows where plc_new >= 0
-pfit <- fitplcs(PIPO_low_shade_sapling, "tree", varnames = c(PLC = "plc_new", WP = "mpa"), nboot = 5)
+pfit <- fitplcs(PIPO_low_shade_sapling_cleaned, "tree", varnames = c(PLC = "plc_new", WP = "mpa"), nboot = 5)
 
 coef(pfit)
 plot(pfit,
@@ -573,7 +589,9 @@ plot(pfit,
      plotci = F, 
      pxlinecol = "black",
      main = "PIPO low elevation, shaded sapling",
-     legend = FALSE)
+     legend = TRUE,
+     xlim= c(0.5,6),
+     ylim = c(0,1))
 
 coef(pfit) %>% 
   clean_names() %>% 
@@ -581,6 +599,9 @@ coef(pfit) %>%
   summarise(mean_P50 = mean(estimate), 
             mean_lwr = mean(boot_2_5_percent), 
             mean_upr = mean(boot_97_5_percent))
+
+# mean_P50 mean_lwr mean_upr
+# 4.198861 4.143742 4.252357
 ```
 
 #PIPO-- high elevation 
@@ -594,9 +615,11 @@ PIPO_high_sun_seedling <- PIPO_high_sun_seedling %>%
 
 PIPO_high_sun_seedling <- PIPO_high_sun_seedling %>% filter(valid_data == TRUE)
 
-# Fit the model using only rows where plc_new >= 0
-pfit <- fitplcs(PIPO_high_sun_seedling, "tree", varnames = c(PLC = "plc_new", WP = "mpa"), nboot = 5)
+PIPO_high_sun_seedling_cleaned <- 
+  PIPO_high_sun_seedling %>%  filter(!row_number() %in% c(8))
 
+# Fit the model using only rows where plc_new >= 0
+pfit <- fitplcs(PIPO_high_sun_seedling_cleaned, "tree", varnames = c(PLC = "plc_new", WP = "mpa"), nboot = 5)
 
 coef(pfit)
 plot(pfit,
@@ -604,7 +627,7 @@ plot(pfit,
      plotci = F, 
      pxlinecol = "black",
      main = "PIPO high elevation, sun exposed seedling",
-     legend = FALSE)
+     legend = TRUE)
 
 coef(pfit) %>% 
   clean_names() %>% 
@@ -612,6 +635,9 @@ coef(pfit) %>%
   summarise(mean_P50 = mean(estimate), 
             mean_lwr = mean(boot_2_5_percent), 
             mean_upr = mean(boot_97_5_percent))
+
+# mean_P50 mean_lwr mean_upr
+# 4.285319 4.151164  4.35537
 ```
 
 ```{r}
@@ -623,9 +649,11 @@ PIPO_high_shade_seedling <- PIPO_high_shade_seedling %>%
          valid_data = ifelse(plc_new >= 0, TRUE, FALSE))  
 PIPO_high_shade_seedling <- PIPO_high_shade_seedling %>% filter(valid_data == TRUE)
 
-# Fit the model using only rows where plc_new >= 0
-pfit <- fitplcs(PIPO_high_shade_seedling, "tree", varnames = c(PLC = "plc_new", WP = "mpa"), nboot = 5)
+PIPO_high_shade_seedling_cleaned <- 
+  PIPO_high_shade_seedling %>%  filter(!row_number() %in% c(1, 6, 7, 9, 15, 21, 25, 27, 28))
 
+# Fit the model using only rows where plc_new >= 0
+pfit <- fitplcs(PIPO_high_shade_seedling_cleaned, "tree", varnames = c(PLC = "plc_new", WP = "mpa"), nboot = 5)
 
 coef(pfit)
 plot(pfit,
@@ -633,7 +661,9 @@ plot(pfit,
      plotci = F, 
      pxlinecol = "black",
      main = "PIPO high elevation, shaded seedling",
-     legend = FALSE)
+     legend = TRUE,
+     xlim = c(0.5, 6),
+     ylim = c(0,1))
 
 coef(pfit) %>% 
   clean_names() %>% 
@@ -641,6 +671,9 @@ coef(pfit) %>%
   summarise(mean_P50 = mean(estimate), 
             mean_lwr = mean(boot_2_5_percent), 
             mean_upr = mean(boot_97_5_percent))
+
+# mean_P50 mean_lwr mean_upr
+# 3.933056 3.880984 3.996827
 ```
 
 ```{r}
@@ -661,7 +694,7 @@ plot(pfit,
      plotci = F, 
      pxlinecol = "black",
      main = "PIPO high elevation, sun exposed sapling",
-     legend = FALSE)
+     legend = TRUE)
 
 coef(pfit) %>% 
   clean_names() %>% 
@@ -669,6 +702,9 @@ coef(pfit) %>%
   summarise(mean_P50 = mean(estimate), 
             mean_lwr = mean(boot_2_5_percent), 
             mean_upr = mean(boot_97_5_percent))
+
+# mean_P50 mean_lwr mean_upr
+# 3.463388 3.373289 3.494514
 
 ```
 
@@ -681,8 +717,11 @@ PIPO_high_shade_sapling <- PIPO_high_shade_sapling %>%
          valid_data = ifelse(plc_new >= 0, TRUE, FALSE))  
 PIPO_high_shade_sapling <- PIPO_high_shade_sapling %>% filter(valid_data == TRUE)
 
+PIPO_high_shade_sapling_cleaned <- 
+  PIPO_high_shade_sapling %>%  filter(!row_number() %in% c(1))
+
 # Fit the model using only rows where plc_new >= 0
-pfit <- fitplcs(PIPO_high_shade_sapling, "tree", varnames = c(PLC = "plc_new", WP = "mpa"), nboot = 5)
+pfit <- fitplcs(PIPO_high_shade_sapling_cleaned, "tree", varnames = c(PLC = "plc_new", WP = "mpa"), nboot = 5)
 
 coef(pfit)
 plot(pfit,
@@ -690,7 +729,9 @@ plot(pfit,
      plotci = F, 
      pxlinecol = "black",
      main = "PIPO high elevation, shaded sapling",
-     legend = FALSE)
+     legend = TRUE, 
+     ylim = c(0,1),
+     xlim = c(0.5, 6))
 
 coef(pfit) %>% 
   clean_names() %>% 
@@ -698,6 +739,10 @@ coef(pfit) %>%
   summarise(mean_P50 = mean(estimate), 
             mean_lwr = mean(boot_2_5_percent), 
             mean_upr = mean(boot_97_5_percent))
+
+# mean_P50 mean_lwr mean_upr
+# 3.463569 3.417393 3.552126
+
 ```
 
 
@@ -713,8 +758,11 @@ ABCO_low_sun_seedling <- ABCO_low_sun_seedling %>%
 
 ABCO_low_sun_seedling <- ABCO_low_sun_seedling %>% filter(valid_data == TRUE)
 
+ABCO_low_sun_seedling_cleaned <- 
+  ABCO_low_sun_seedling %>%  filter(!row_number() %in% c(1, 5, 44, 45, 65))
+
 # Fit the model using only rows where plc_new >= 0
-pfit <- fitplcs(ABCO_low_sun_seedling, "tree", varnames = c(PLC = "plc_new", WP = "mpa"), nboot = 5)
+pfit <- fitplcs(ABCO_low_sun_seedling_cleaned, "tree", varnames = c(PLC = "plc_new", WP = "mpa"), nboot = 5)
 
 
 coef(pfit)
@@ -723,7 +771,9 @@ plot(pfit,
      plotci = F, 
      pxlinecol = "black",
      main = "ABCO low elevation, sun exposed seedling",
-     legend = FALSE)
+     legend = TRUE,
+     xlim = c(0.5,7),
+     ylim = c(0,1))
 
 coef(pfit) %>% 
   clean_names() %>% 
@@ -731,6 +781,10 @@ coef(pfit) %>%
   summarise(mean_P50 = mean(estimate), 
             mean_lwr = mean(boot_2_5_percent), 
             mean_upr = mean(boot_97_5_percent))
+
+# mean_P50 mean_lwr mean_upr
+# 4.607088 4.555313 4.671386
+
 ```
 
 ```{r}
@@ -762,6 +816,10 @@ coef(pfit) %>%
   summarise(mean_P50 = mean(estimate), 
             mean_lwr = mean(boot_2_5_percent), 
             mean_upr = mean(boot_97_5_percent))
+
+# mean_P50 mean_lwr mean_upr
+# 4.322233 4.201657 4.468325
+
 ```
 
 ```{r}
@@ -813,7 +871,9 @@ plot(pfit,
      plotci = F, 
      pxlinecol = "black",
      main = "ABCO low elevation, shaded sapling",
-     legend = FALSE)
+     legend = FALSE,
+     xlim = c(0.6,6),
+     ylim = c(0,1))
 
 coef(pfit) %>% 
   clean_names() %>% 
@@ -857,6 +917,8 @@ coef(pfit) %>%
 ```{r}
 ABCO_high_shade_seedling <- vc_all2 %>% 
   filter((tree %in% c("128")))
+
+#282
   
 ABCO_high_shade_seedling <- ABCO_high_shade_seedling %>%
   mutate(k = format(k, scientific = FALSE),  # Ensure 'k' is formatted as non-scientific
@@ -887,6 +949,8 @@ coef(pfit) %>%
 ABCO_high_sun_sapling <-vc_all2 %>% 
   filter((tree %in% c("297.1")))
 
+#235.1, 235.2, 220.1, 276.1 :(
+
 ABCO_high_sun_sapling <- ABCO_high_sun_sapling %>%
   mutate(k = format(k, scientific = FALSE),  # Ensure 'k' is formatted as non-scientific
          valid_data = ifelse(plc_new >= 0, TRUE, FALSE))  
@@ -901,7 +965,9 @@ plot(pfit,
      plotci = F, 
      pxlinecol = "black",
      main = "ABCO high elevation, sun exposed sapling",
-     legend = TRUE)
+     legend = TRUE,
+     xlim= c(0.5, 6),
+     ylim = c(0,1))
 
 coef(pfit) %>% 
   clean_names() %>% 
@@ -947,7 +1013,9 @@ coef(pfit) %>%
 #ABMA -- high elevation
 ```{r}
 ABMA_high_sun_seedling <- vc_all2 %>% 
-  filter((tree %in% c("71.1","291")))
+  filter((tree %in% c("71.1")))
+
+#291
 
 ABMA_high_sun_seedling <- ABMA_high_sun_seedling %>%
   mutate(k = format(k, scientific = FALSE),  # Ensure 'k' is formatted as non-scientific
@@ -965,7 +1033,7 @@ plot(pfit,
      plotci = F, 
      pxlinecol = "black",
      main = "ABMA high elevation, sun exposed seedling",
-     legend = FALSE)
+     legend = TRUE)
 
 coef(pfit) %>% 
   clean_names() %>% 
@@ -982,6 +1050,8 @@ coef(pfit) %>%
 ```{r}
 ABMA_high_shade_seedling <- vc_all2 %>% 
   filter((tree %in% c("136.1")))
+
+#240.1
   
 ABMA_high_shade_seedling <- ABMA_high_shade_seedling %>%
   mutate(k = format(k, scientific = FALSE),  # Ensure 'k' is formatted as non-scientific
@@ -1055,6 +1125,8 @@ coef(pfit) %>%
 ```{r}
 ABMA_high_shade_sapling <-vc_all2 %>% 
   filter(tree %in% c("280.2"))
+
+#280.1
 
 ABMA_high_shade_sapling <- ABMA_high_shade_sapling %>%
   mutate(k = format(k, scientific = FALSE),  # Ensure 'k' is formatted as non-scientific
