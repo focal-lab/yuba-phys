@@ -25,6 +25,12 @@ library(lme4)
 Size distributions of seedlings and saplings
 
 ```{r, echo = FALSE, message = FALSE, warning = FALSE}
+# create a new column for size that categorizes individuals with diameter at root collar > 2.5 cm as saplings and individuals with diameter at root collar < 2.5 cm seedlings
+
+trait_data1 <- trait_data1 %>%
+  mutate(size = ifelse(DBH_complete < 2.5, "seedling", "sapling"))
+
+
 ggplot(trait_data1, aes(x = DBH_complete, fill = size)) +
   geom_histogram(binwidth = 0.5, position = "dodge", alpha = 0.7, color = "black") +
   labs( 
@@ -35,12 +41,6 @@ ggplot(trait_data1, aes(x = DBH_complete, fill = size)) +
   theme(
     panel.grid.major = element_blank(), 
     panel.grid.minor = element_blank())
-
-# create a new column for size that categorizes individuals with diameter at root collar > 2.5 cm as saplings and individuals with diameter at root collar < 2.5 cm seedlings
-
-trait_data1 <- trait_data1 %>%
-  mutate(size = ifelse(DBH_complete < 2.5, "seedling", "sapling"))
-
 
 ```
 
@@ -200,10 +200,8 @@ curve (coef(mod1)[1] + coef(mod1)[2]*x, add=TRUE) ## plotting the fitted regress
 
 
 trait_data2 <- trait_data1 %>%
-  # Create predawn data
   mutate(time_of_day = "predawn", water_potential = predawn_MPa) %>%
   bind_rows(
-    # Create midday data
     trait_data1 %>%
       mutate(time_of_day = "midday", water_potential = midday_MPa)
   )
@@ -481,9 +479,22 @@ ggplot(trait_data1, aes(x = microsite, y = predawn_MPa, fill = species)) +
 
 ```
 
+
 ```{r}
-mod5 <- lm(predawn_MPa ~ species * microsite * elevation, 
-             data = trait_data1)
+ggplot(yuba_phys_P50_2024, aes(x = size_class, y = P50_MPa, fill = species)) + geom_boxplot(position = position_dodge(0.8), outlier.shape = NA) +  
+  labs(x = "Elevation",
+       y = "P50 (-MPa)",
+       fill = "Species") +
+  #scale_y_reverse() +  # Reverse the y-axis
+  theme_bw() +
+  theme(
+    panel.grid.major = element_blank(), 
+    panel.grid.minor = element_blank())
+```
+
+```{r}
+mod5 <- lmer(P50_MPa ~size_class + elevation + (1|plot), 
+             data = yuba_phys_P50_2024)
 summary(mod5)
 ```
 
@@ -558,7 +569,7 @@ ABCO_cleaned_data <- ABCO[!is.na(ABCO$DBH_complete) & !is.na(ABCO$percent_cover)
 ABCO_cleaned_data <- ABCO[!is.na(ABCO$DBH_complete) & !is.na(ABCO$percent_cover), ]
 
 
-mod7<- lmer(ABCO$predawn_MPa~ percent_cover + DBH_complete + stand_basal_area + elevation + (1|plot), REML = TRUE, data = ABCO)
+mod7<- lmer(PILA$midday_MPa~ DBH_complete + percent_cover +DBH_complete:percent_cover + (1|plot), REML = TRUE, data = PILA)
 summary(mod7)
 
 # Get the fitted values (predicted values) from the model
