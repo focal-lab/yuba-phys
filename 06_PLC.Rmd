@@ -1270,47 +1270,4 @@ trait_data1 <- trait_data1 %>%
   ))
 ```
 
-#P50 stats
-```{r}
-## subset dataframe to include only seedlings and saplings for ABCO, PIPO, PILA, and ABMA
-yuba_phys_P50_2024 <- yuba_phys_P50[yuba_phys_P50$size_class %in% c('seedling', 'sapling'), ]
-
-yuba_phys_P50_2024 <- yuba_phys_P50_2024[yuba_phys_P50_2024$species %in% c('ABCO', 'ABMA','PIPO', 'PILA'), ]
-
-yuba_phys_P50_2024$P50_MPa <- as.numeric(as.character(yuba_phys_P50_2024$P50_MPa))
-
-
-ggplot(yuba_phys_P50_2024, aes(x = elevation, y = P50_MPa, fill = species)) +
-  geom_boxplot() +
-  labs(
-    x = "Elevation",
-    y = "P50"
-  ) +
-    theme_bw() +
-  theme(
-    panel.grid.major = element_blank(), 
-    panel.grid.minor = element_blank())+
-  scale_fill_manual(values = c("skyblue", "lightgreen", "purple"))
-
-
-ggplot(yuba_phys_P50_2024, aes(x = elev_band_ft, y = P50_MPa, color = species)) +
-  geom_point(size = 3, alpha = 0.7) +
-  theme_bw() +
-  labs(x = "Elevation",
-       y = "P50")
-
-
-plot(yuba_phys_P50_2024$P50_MPa~yuba_phys_P50_2024$elev_band_ft)
-
-
-```
-
-
-# HSM
-```{r}
-
-
-
-
-```
 

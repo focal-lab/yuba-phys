@@ -22,8 +22,7 @@ library(lme4)
 
 ```
 
-Size distributions of seedlings and saplings
-
+#size distribution
 ```{r, echo = FALSE, message = FALSE, warning = FALSE}
 # create a new column for size that categorizes individuals with diameter at root collar > 2.5 cm as saplings and individuals with diameter at root collar < 2.5 cm seedlings
 
@@ -44,7 +43,7 @@ ggplot(trait_data1, aes(x = DBH_complete, fill = size)) +
 
 ```
 
-Distribution of seedlings and saplings across light environments
+# microsite distributions
 ```{r, echo = FALSE, message = FALSE, warning = FALSE}
 
 ggplot(trait_data1, aes(x = DBH_complete, y = percent_cover, color = species)) +
@@ -115,6 +114,7 @@ ggplot(trait_data1, aes(x = microsite, y = percent_cover)) +
 
 ```
 
+# stand basal area
 Distribution of stand basal area across elevation
 -- how similar is stand density between plots at high and low elevation
 ```{r, echo = FALSE, message = FALSE, warning = FALSE}
@@ -169,7 +169,41 @@ ggplot(trait_data1, aes(x = microsite, y = stand_basal_area)) +
 
 ```
 
+# environmental variables
+```{r}
+# Create a correlation matrix for environmental variables
+cor_matrix <- cor(trait_data1[, c("percent_cover", "elev_band_ft", "stand_basal_area")], use = "pairwise.complete.obs")
+print(cor_matrix)
 
+cor(trait_data1$elev_band_ft, trait_data1$stand_basal_area, method = "pearson")
+cor.test(trait_data1$stand_basal_area, trait_data1$percent_cover, method="pearson")
+
+install.packages("ggcorrplot") 
+library(ggcorrplot)
+library(corrplot)
+library("ggpubr")
+
+# Create a custom set of axis labels (modify as per your needs)
+custom_labels <- c("Canopy Closure", "Elevation (ft)", "Stand Basal Area")
+
+colnames(cor_matrix) <- custom_labels
+rownames(cor_matrix) <- custom_labels
+
+# Visualize the correlation matrix with custom axis labels
+corrplot(cor_matrix, 
+         method = "color",          # Color-based visualization
+         type = "lower",            # Show only the lower triangle
+         order = "hclust",          # Order the variables based on hierarchical clustering
+         addCoef.col = "black",     # Add the correlation values in black color
+         tl.col = "black",          # Color of the labels on the axes
+         tl.srt = 45,               # Rotate the axis labels by 45 degrees
+         tl.labels = custom_labels, # Custom axis labels
+         title = "Correlation Plot"
+)
+
+```
+
+# predawn
 ```{r}
 p2 <- ggplot(data = trait_data1, aes(x = DBH_complete, y = predawn_MPa, color = species, linetype = elevation)) +
   geom_smooth(method = "lm", se = FALSE, size = 1.2, alpha = 0.7) +
@@ -388,6 +422,7 @@ summary(mod3)
 
 ```
 
+# midday
 ```{r, echo = FALSE, message = FALSE, warning = FALSE}
 ggplot(trait_data1, aes(x = microsite, y = midday_MPa, fill = species)) +
   geom_boxplot(position = position_dodge(0.8), outlier.shape = NA) +  
@@ -479,7 +514,7 @@ ggplot(trait_data1, aes(x = microsite, y = predawn_MPa, fill = species)) +
 
 ```
 
-
+# P50
 ```{r}
 ggplot(yuba_phys_P50_2024, aes(x = size_class, y = P50_MPa, fill = species)) + geom_boxplot(position = position_dodge(0.8), outlier.shape = NA) +  
   labs(x = "Elevation",
@@ -522,37 +557,46 @@ summary(mod6)
 ```
 
 ```{r}
-# Create a correlation matrix for environmental variables
-cor_matrix <- cor(trait_data1[, c("percent_cover", "elev_band_ft", "stand_basal_area")], use = "pairwise.complete.obs")
-print(cor_matrix)
+ggplot(yuba_phys_P50_2024, aes(x = elevation, y = P50_MPa, fill = species)) +
+  geom_boxplot() +
+  labs(
+    x = "Elevation",
+    y = "P50"
+  ) +
+    theme_bw() +
+  theme(
+    panel.grid.major = element_blank(), 
+    panel.grid.minor = element_blank())+
+  scale_fill_manual(values = c("skyblue", "lightgreen", "purple"))
 
-cor(trait_data1$elev_band_ft, trait_data1$stand_basal_area, method = "pearson")
-cor.test(trait_data1$stand_basal_area, trait_data1$percent_cover, method="pearson")
 
-install.packages("ggcorrplot") 
-library(ggcorrplot)
-library(corrplot)
-library("ggpubr")
+ggplot(yuba_phys_P50_2024, aes(x = elev_band_ft, y = P50_MPa, color = species)) +
+  geom_point(size = 3, alpha = 0.7) +
+  theme_bw() +
+  labs(x = "Elevation",
+       y = "P50")
 
-# Create a custom set of axis labels (modify as per your needs)
-custom_labels <- c("Canopy Closure", "Elevation (ft)", "Stand Basal Area")
 
-colnames(cor_matrix) <- custom_labels
-rownames(cor_matrix) <- custom_labels
+plot(yuba_phys_P50_2024$P50_MPa~yuba_phys_P50_2024$elev_band_ft)
 
-# Visualize the correlation matrix with custom axis labels
-corrplot(cor_matrix, 
-         method = "color",          # Color-based visualization
-         type = "lower",            # Show only the lower triangle
-         order = "hclust",          # Order the variables based on hierarchical clustering
-         addCoef.col = "black",     # Add the correlation values in black color
-         tl.col = "black",          # Color of the labels on the axes
-         tl.srt = 45,               # Rotate the axis labels by 45 degrees
-         tl.labels = custom_labels, # Custom axis labels
-         title = "Correlation Plot"
-)
 
 ```
+
+
+# HSM
+```{r}
+
+
+
+
+```
+
+
+
+
+
+```
+
 
 ```{r}
 library(lme4)
