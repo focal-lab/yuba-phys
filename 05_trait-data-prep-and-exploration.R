@@ -156,22 +156,29 @@ write.csv(trait_data1, "trait_data1.csv", row.names = FALSE)
 # merge P50 data with main trait dataframe 
 
 ## subset dataframe to include only seedlings and saplings for ABCO, PIPO, PILA, and ABMA
-yuba_phys_P50_2024 <- yuba_phys_P50[yuba_phys_P50$size_class %in% c('seedling', 'sapling'), ]
+#yuba_phys_P50_2024 <- yuba_phys_P50[yuba_phys_P50$size_class %in% c('seedling', 'sapling'), ]
 
-yuba_phys_P50_2024 <- yuba_phys_P50_2024[yuba_phys_P50_2024$species %in% c('ABCO', 'ABMA','PIPO', 'PILA'), ]
+#yuba_phys_P50_2024 <- yuba_phys_P50_2024[yuba_phys_P50_2024$species %in% c('ABCO', 'ABMA','PIPO', 'PILA'), ]
 
-yuba_phys_P50_2024$P50_MPa <- as.numeric(as.character(yuba_phys_P50_2024$P50_MPa))
+trait_data1$P50_MPa <- as.numeric(as.character(trait_data1$P50_MPa))
 
-P50 <- yuba_phys_P50_2024[, c("tree_ID", "P50_MPa", "P50_branch_1", "P50_branch_2", "P50_branch_3")]
+#P50 <- yuba_phys_P50_2024[, c("tree_ID", "P50_MPa", "P50_branch_1", "P50_branch_2", "P50_branch_3")]
 
-trait_data1 <- trait_data1[, !(names(trait_data1) %in% "P50_MPa")]
+#trait_data1 <- trait_data1[, !(names(trait_data1) %in% "P50_MPa")]
 
-trait_data2 <- merge(trait_data1, P50, by = "tree_ID")
+#trait_data2 <- merge(trait_data1, P50, by = "tree_ID")
 
-trait_data2$HSM_predawn <- trait_data2$P50_MPa - trait_data2$predawn_MPa
-trait_data2$HSM_midday  <- trait_data2$P50_MPa - trait_data2$midday_MPa
+trait_data1$HSM_predawn <- trait_data1$P50_MPa - trait_data1$predawn_MPa
+trait_data1$HSM_midday  <- trait_data1$P50_MPa - trait_data1$midday_MPa
 
-trait_data2 <- trait_data2[, !(names(trait_data2) %in% "HSM_MPa")]
+
+trait_data1$HSM_predawn_P50_mean <- trait_data1$P50_mean - trait_data1$predawn_MPa
+trait_data1$HSM_midday_P50_mean  <- trait_data1$P50_mean - trait_data1$midday_MPa
+
+trait_data1 <- trait_data1 %>%
+  mutate(size = ifelse(DBH_complete < 2.5, "seedling", "sapling"))
+
+trait_data1 <- trait_data1[, !(names(trait_data1) %in% "HSM_MPa")]
 
 
 # do predawn and midday water potentials differ by microsite, species, and elevation?
