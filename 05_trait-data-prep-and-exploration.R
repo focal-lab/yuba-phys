@@ -171,14 +171,21 @@ trait_data1$P50_MPa <- as.numeric(as.character(trait_data1$P50_MPa))
 trait_data1$HSM_predawn <- trait_data1$P50_MPa - trait_data1$predawn_MPa
 trait_data1$HSM_midday  <- trait_data1$P50_MPa - trait_data1$midday_MPa
 
-
-trait_data1$HSM_predawn_P50_mean <- trait_data1$P50_mean - trait_data1$predawn_MPa
-trait_data1$HSM_midday_P50_mean  <- trait_data1$P50_mean - trait_data1$midday_MPa
-
 trait_data1 <- trait_data1 %>%
   mutate(size = ifelse(DBH_complete < 2.5, "seedling", "sapling"))
 
 trait_data1 <- trait_data1[, !(names(trait_data1) %in% "HSM_MPa")]
+
+## see PLC script to make sure P50 means are loaded 
+
+trait_data1$HSM_predawn_P50_mean <- trait_data1$P50_mean - trait_data1$predawn_MPa
+trait_data1$HSM_midday_P50_mean  <- trait_data1$P50_mean - trait_data1$midday_MPa
+
+
+ABCO <- trait_data1[trait_data1$species == 'ABCO',]
+PILA <- trait_data1[trait_data1$species == 'PILA',]
+PIPO <- trait_data1[trait_data1$species == 'PIPO',]
+ABMA <- trait_data1[trait_data1$species == 'ABMA',]
 
 
 # do predawn and midday water potentials differ by microsite, species, and elevation?
