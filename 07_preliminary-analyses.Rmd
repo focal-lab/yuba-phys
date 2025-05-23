@@ -258,8 +258,8 @@ theme(
 p2
 install.packages('MuMIn')
 library(MuMIn)
-dredge_df <- na.omit(PIPO[, c("predawn_MPa", "elev_indiv", "DBH_complete", "percent_cover", "plot")])
-global <- lmer(predawn_MPa ~ elev_indiv * DBH_complete * percent_cover + (1|plot), data = dredge_df, na.action = na.fail)
+dredge_df <- na.omit(ABCO[, c("predawn_MPa", "elev_indiv", "DBH_complete", "percent_cover", "plot")])
+global <- lmer(predawn_MPa ~ elev_indiv * DBH_complete * percent_cover + (1|plot), data = dredge_df, na.action = na.fail, REML = FALSE)
 dredge(global)
 
 mod1 <- lm(predawn_MPa~DBH_complete + elevation, data = trait_data1)
@@ -569,8 +569,16 @@ mod1<- lm(P50_MPa ~ DBH_complete, data = PIPO)
 summary(mod1)
 
 ### stats
-mod5 <- lm(predawn_MPa ~  elev_indiv + percent_cover + DBH_complete, data = ABCO)
+mod5 <- lmer(P50_MPa ~DBH_complete + elev_indiv + percent_cover + (1|plot), data = ABCO)
 summary(mod5)
+
+mod6<- lmer(predawn_MPa ~ 1 + (1|plot), data = dredge_df)
+anova(mod6, mod7, mod8)
+mod7 <- lmer(predawn_MPa ~elev_indiv + (1|plot), data = dredge_df)
+mod8 <- lmer(predawn_MPa ~DBH_complete + elev_indiv + (1|plot), data = dredge_df)
+summary(mod5)
+
+
 
 ggplot(trait_data2[!is.na(trait_data2$size), ], aes(y = P50_MPa, x = percent_cover, color = species)) +
   geom_point(size = 3, alpha = 1) +
@@ -642,7 +650,7 @@ p2 <- ggplot(trait_data1, aes(x = DBH_complete, y = HSM_predawn_P50_mean, color 
 p1 
 grid.arrange(p1, p2, nrow = 2, ncol = 1)
 
-mod6<- lm(trait_data2$midday_MPa~DBH_complete, data= trait_data2)
+mod6<- lm(HSM_predawn_P50_mean ~ DBH_complete, data= PIPO)
 summary(mod6)
 ```
 
@@ -712,9 +720,9 @@ ggplot(data = subset(trait_data2, !type %in% c("HSM_predawn", "HSM_midday")),
 
 
 
-ggplot(data = subset(trait_data2, !type %in% c("HSM_predawn", "HSM_midday",  "P50_MPa")),
+h2 <- ggplot(data = subset(trait_data2, !type %in% c("HSM_predawn", "HSM_midday")),
        aes(x = elev_indiv, y = water_potential, color = type)) +
-  facet_wrap(~species) +
+  facet_wrap(~species, ncol = 1) +
   geom_line(data = subset(trait_data2, type %in% c("predawn_MPa", "P50_mean")),
             aes(x = elev_indiv, y = water_potential, group = tree_ID),
             color = "gray40",
@@ -724,29 +732,30 @@ ggplot(data = subset(trait_data2, !type %in% c("HSM_predawn", "HSM_midday",  "P5
   geom_smooth(method = "lm", se = FALSE) +
   scale_x_continuous(breaks = seq(floor(min(trait_data1$elev_indiv)), ceiling(max(trait_data1$elev_indiv)), by = 500)) +
   scale_color_manual(values = c(
+    "P50_MPa" = "deepskyblue4", 
     "P50_mean" = "darkblue",
     "midday_MPa" = "darkcyan",
     "predawn_MPa" = "steelblue3"
   )) +
   theme_bw() +
   labs(
-    title = "P50 means",
-    x = "Elevation",
+    x = "Elevation (ft)",
     y = "Water Potential (-MPa)",
     color = "type"
   ) +
   theme(
     panel.grid.major = element_blank(),
-    panel.grid.minor = element_blank()
+    panel.grid.minor = element_blank(),
+    legend.position = "none"
   )
 
 
+h2
 
-
-ggplot(data = subset(trait_data2, !type %in% c("HSM_predawn", "HSM_midday")),
+h1 <- ggplot(data = subset(trait_data2, !type %in% c("HSM_predawn", "HSM_midday")),
        aes(x = DBH_complete, y = water_potential, color = type)) +
-  facet_wrap(~species) +
-  geom_line(data = subset(trait_data2, type %in% c("predawn_MPa", "P50_MPa")),
+  facet_wrap(~species, ncol = 1) +
+  geom_line(data = subset(trait_data2, type %in% c("predawn_MPa", "P50_mean")),
             aes(x = DBH_complete, y = water_potential, group = tree_ID),
             color = "gray40",
             size = 0.6,
@@ -754,13 +763,13 @@ ggplot(data = subset(trait_data2, !type %in% c("HSM_predawn", "HSM_midday")),
   geom_point(size = 3) +
   geom_smooth(method = "lm", se = FALSE) +
   scale_color_manual(values = c(
+    "P50_MPa" = "blue",
     "P50_mean" = "darkblue",
     "midday_MPa" = "darkcyan",
     "predawn_MPa" = "steelblue3"
   )) +
   theme_bw() +
   labs(
-    title = "using actual data",
     x = "Diameter at root collar (cm)",
     y = "Water Potential (-MPa)",
     color = "type"
@@ -769,7 +778,9 @@ ggplot(data = subset(trait_data2, !type %in% c("HSM_predawn", "HSM_midday")),
     panel.grid.major = element_blank(),
     panel.grid.minor = element_blank()
   )
+h1
 
+grid.arrange(h1,h2, nrow = 1, ncol = 2)
 ```
 
 
