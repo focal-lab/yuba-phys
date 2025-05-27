@@ -188,124 +188,13 @@ PIPO <- trait_data1[trait_data1$species == 'PIPO',]
 ABMA <- trait_data1[trait_data1$species == 'ABMA',]
 
 
-# do predawn and midday water potentials differ by microsite, species, and elevation?
-ggplot(trait_data1, aes(x = microsite, y = midday_MPa, fill = species)) +
-  geom_boxplot(position = position_dodge(0.8), outlier.shape = NA) +  
-  facet_wrap(~ elevation) +
-  labs(
-       x = "Microsite",
-       y = "Midday Water Potential (-MPa)",
-       fill = "Species") +
-  scale_y_reverse() +  # Reverse the y-axis
-  theme_bw() +
-  theme(
-    panel.grid.major = element_blank(), 
-    panel.grid.minor = element_blank())
+trait_data2 <- trait_data1 %>%
+  pivot_longer(
+    cols = c(predawn_MPa, midday_MPa, P50_MPa, P50_mean, HSM_predawn, HSM_midday),
+    names_to = "type",
+    values_to = "water_potential"
+  )
 
-
-ggplot(trait_data1, aes(x = microsite, y = predawn_MPa, fill = species)) +
-  geom_boxplot(position = position_dodge(0.8), outlier.shape = NA) +  
-  facet_wrap(~ elevation) +
-  labs(
-    x = "Microsite",
-    y = "Predawn Water Potential (-MPa)",
-    fill = "Species") +
-  scale_y_reverse() +  # Reverse the y-axis
-  theme_bw() +
-  theme(
-    panel.grid.major = element_blank(), 
-    panel.grid.minor = element_blank())
-
-# high elevation plots are oddly more dry, could this be because of stand basal area or 
-# heat load index ?
-
-t_test <- t.test(midday_MPa ~ elevation, data = trait_data1)
-print(t_test)
-# midday water potential is not different between elevations
-# predawn water potential is different between elevations, could this be skewed by a 
-# late August rain, plots 1 & 2 were measured ~5 days after this rain, lets see if 
-# removing these two plots changes our results
-
-t_test <- t.test(predawn_MPa ~ elevation, 
-                        data = trait_data1 %>% filter(!plot %in% c(1, 2)))
-print(t_test)
-
-# removing plots 1 & 2 results in there being no difference in predawn WP across elevations
-
-plot(trait_data1$midday_MPa~trait_data1$stand_basal_area)
-
-# what about differences between size classes?
-ggplot(trait_data1, aes(x = size_class, y = predawn_MPa, fill = species)) +
-  geom_boxplot(position = position_dodge(0.8), outlier.shape = NA) +  
-  facet_wrap(~ elevation) +
-  labs(
-    x = "Size",
-    y = "Predawn Water Potential (-MPa)",
-    fill = "Species") +
-  scale_y_reverse() +  # Reverse the y-axis
-  theme_bw() +
-  theme(
-    panel.grid.major = element_blank(), 
-    panel.grid.minor = element_blank())
-
-ggplot(trait_data1, aes(x = size_class, y = midday_MPa, fill = species)) +
-  geom_boxplot(position = position_dodge(0.8), outlier.shape = NA) +  
-  facet_wrap(~ elevation) +
-  labs(
-    x = "Size",
-    y = "Midday Water Potential (-MPa)",
-    fill = "Species") +
-  scale_y_reverse() +  # Reverse the y-axis
-  theme_bw() +
-  theme(
-    panel.grid.major = element_blank(), 
-    panel.grid.minor = element_blank())
-
-# is midday WP different across size, species, microsite, and elevation
-ggplot(trait_data1, aes(x = microsite, y = midday_MPa, fill = interaction(size_class, species))) +
-  geom_boxplot(position = position_dodge(0.8), outlier.shape = NA) +  
-  facet_wrap(~ elevation) +
-  labs(
-    x = "Microsite",
-    y = "Midday Water Potential (-MPa)",
-    fill = "Species and size") +
-  scale_y_reverse() +  # Reverse the y-axis
-  theme_bw() +
-  theme(
-    panel.grid.major = element_blank(), 
-    panel.grid.minor = element_blank())
-
-# stats
-
-# start by testing whether trait data is normally distributed using the Shapiro-Wilk's Test
-shapiro_test <- shapiro.test(trait_data1$predawn_MPa)
-print(shapiro_test) 
-# data are close to normally distributed but with weak significance for
-# both predawn and midday WP measurements 
-
-# check for homogeneity of variances using Levene's test or Bartlett's test. 
-# if the variances across groups are similar, you can confidently use ANOVA.
-
-install.packages("car")
-library(car)
-
-levene_test <- leveneTest(midday_MPa ~ elevation * species, data = trait_data1)
-print(levene_test)
-
-# The F statistic measures the ratio of variance between the groups to the variance 
-# within the groups. A larger F value indicates greater variance between groups 
-# compared to within groups.
-
-# proceeding with a parametric ANOVA to test differences in mean WP between groups
-# will revisit whether non-parametric (Kruskal-Wallis Test) is more appropriate
-
-anova <- aov(midday_MPa ~ species * size_class * elevation, 
-             data = trait_data1)
-summary(anova)
-
-mod3 <- lm(midday_MPa ~ species * size_class * elevation, 
-             data = trait_data1)
-summary(mod3)
 
 
 
