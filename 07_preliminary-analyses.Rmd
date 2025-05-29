@@ -223,7 +223,8 @@ s1 <- ggplot(trait_data1, aes(y = P50_MPa, x = DBH_complete, color = species)) +
     panel.grid.major = element_blank(),
     panel.grid.minor = element_blank(),
     panel.border = element_blank(),
-    axis.line = element_line(color = "black")
+    axis.line = element_line(color = "black"),
+  legend.position = "none"
   )
 
 s1
@@ -243,15 +244,94 @@ s2 <- ggplot(trait_data1, aes(x = DBH_complete, y = HSM_predawn_P50_mean, color 
     panel.grid.major = element_blank(),
     panel.grid.minor = element_blank(),
     panel.border = element_blank(),
-    axis.line = element_line(color = "black")
+    axis.line = element_line(color = "black"),
+  legend.position = "none"
   )
 
 s2 
-grid.arrange(s1, s2, nrow = 2, ncol = 1)
+
+s3 <- ggplot(trait_data1, aes(x = DBH_complete, y = midday_MPa, color = species)) +
+  geom_point(size = 3, alpha = 1) +  
+  geom_smooth(method = "lm", se = TRUE, alpha = 0.3) +  
+  scale_color_manual(values = c(
+    "ABCO" = "mediumturquoise",
+    "PIPO" = "lawngreen",
+    "ABMA" = "maroon3",
+    "PILA" = "lightslateblue"
+  )) +
+  labs(x = "Diameter at root collar (cm)", y = "Predawn Water Potential (-MPa)") +
+  theme(
+    panel.background = element_blank(),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.border = element_blank(),
+    axis.line = element_line(color = "black"),
+    legend.position = "none"
+  )
+
+s3 
+
+grid.arrange(s1, s3, s2, nrow = 3, ncol = 1)
+mod1<- lm(P50_MPa ~ percent_cover, data = PILA)
+summary(mod1)
 
 ```
 
-# Figure 2 - microsite
+# Figure 2&3 - microsite
+```{r}
+
+m1 <- ggplot(trait_data1, aes(x = percent_cover, y = P50_MPa, color = species)) +
+  geom_point(size = 3, alpha = 1) +  
+  geom_smooth(method = "lm", se = TRUE,  alpha = 0.25) +
+  labs(
+    x = "Canopy closure (%)", 
+    y = "P50 (-MPa)", 
+    color = "Species"
+  ) +
+  theme_bw() +
+  scale_color_manual(values = c(
+    "ABCO" = "mediumturquoise",
+    "PIPO" = "lawngreen",
+    "ABMA" = "maroon3",
+    "PILA" = "lightslateblue"
+  )) +
+  #scale_y_reverse() + 
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank()
+  )
+
+m1
+
+m2 <- ggplot(subset(trait_data1, !is.na(size)),aes(x = percent_cover, y = P50_MPa, color = species)) + facet_wrap(~size) +
+  geom_point(size = 3, alpha = 1) +  
+  geom_smooth(method = "lm", se = TRUE,  alpha = 0.25) +
+  labs(
+    x = "Canopy closure (%)", 
+    y = "P50 (-MPa)", 
+    color = "Species"
+  ) +
+  theme_bw() +
+  scale_color_manual(values = c(
+    "ABCO" = "mediumturquoise",
+    "PIPO" = "lawngreen",
+    "ABMA" = "maroon3",
+    "PILA" = "lightslateblue"
+  )) +
+  #scale_y_reverse() + 
+theme(
+  panel.grid.major = element_blank(),
+  panel.grid.minor = element_blank(),
+  legend.position = "none"
+)
+
+m2
+
+
+grid.arrange(m1, m2, nrow = 2, ncol = 1)
+```
+
+# Figure 4&5 - elev
 ```{r}
 
 install.packages("gridExtra")
@@ -305,8 +385,7 @@ p2 <- ggplot(subset(trait_data1, species != "ABMA"), aes(x = elev_indiv, y = P50
   #scale_y_reverse() + 
   theme(
     panel.grid.major = element_blank(),
-    panel.grid.minor = element_blank(),
-    legend.position = "none"
+    panel.grid.minor = element_blank()
   )
 
 p2
@@ -337,45 +416,12 @@ theme(
 
 p3
 
-grid.arrange(p1, p2, p3, nrow = 2, ncol = 2)
-```
-
-
-# Figure 3 - elev
-```{r}
-
-p1 <- ggplot(subset(trait_data1, species != "ABMA"), aes(x = elev_indiv, y = HSM_predawn_P50_mean, color = species)) +
+p4 <- ggplot(subset(trait_data1, species != "ABMA" & !is.na(size)), aes(x = elev_indiv, y = P50_MPa, color = species)) + facet_wrap(~size) +
   geom_point(size = 3, alpha = 1) +  
   geom_smooth(method = "lm", se = TRUE,  alpha = 0.25) +
   labs(
     x = "Elevation (ft)", 
-    y = "HSM (MPa)", 
-    color = "Species"
-  ) +
-  theme_bw() +
-  scale_color_manual(values = c(
-    "ABCO" = "mediumturquoise",
-    "PIPO" = "lawngreen",
-    "ABMA" = "maroon3",
-    "PILA" = "lightslateblue"
-  )) +
-  scale_x_continuous(breaks = seq(floor(min(trait_data1$elev_indiv)),
-                                ceiling(max(trait_data1$elev_indiv)),
-                                 by = 500)) +
-  #scale_y_reverse() + 
-  theme(
-    panel.grid.major = element_blank(),
-    panel.grid.minor = element_blank()
-  )
-
-p1
-
-p2 <- ggplot(subset(trait_data1, species != "ABMA" & !is.na(size)), aes(x = elev_indiv, y = HSM_predawn_P50_mean, color = species)) + facet_wrap(~size) +
-  geom_point(size = 3, alpha = 1) +  
-  geom_smooth(method = "lm", se = TRUE,  alpha = 0.25) +
-  labs(
-    x = "Elevation (ft)", 
-    y = "HSM (MPa)", 
+    y = "P50 (-MPa)", 
     color = "Species"
   ) +
   theme_bw() +
@@ -395,13 +441,17 @@ theme(
   legend.position = "none"
 )
 
-p2
+p4
 
+#fig 2
+grid.arrange(p1, p3, nrow = 2, ncol = 1)
 
-grid.arrange(p1, p2, nrow = 2, ncol = 1)
+#fig 3
+grid.arrange(p2, p4, nrow = 2, ncol = 1)
 ```
 
-# Figure 4 - HSM 
+
+# Figure 6 - HSM 
 ```{r}
 h1 <- ggplot(data = subset(trait_data2, !type %in% c("HSM_predawn", "HSM_midday")),
        aes(x = DBH_complete, y = water_potential, color = type)) +
@@ -469,15 +519,18 @@ grid.arrange(h1,h2, nrow = 1, ncol = 2)
 
 # stats - Table 1 & 2
 ```{r}
-mod5 <- lmer(P50_MPa ~DBH_complete + elev_indiv + percent_cover + (1|plot), data = ABCO)
-summary(mod5)
+mod1 <- lmer(HSM_predawn_P50_mean_scaled ~ species + DBH_complete_scaled + elev_indiv_scaled + percent_closure_scaled + (1|plot), data = trait_data1)
+summary(mod1)
 
-# likelihood ratio test for comparison of models by hypothesis testing versus AICc model selection
-mod6<- lmer(predawn_MPa ~ 1 + (1|plot), data = dredge_df)
-anova(mod6, mod7, mod8)
-mod7 <- lmer(predawn_MPa ~elev_indiv + (1|plot), data = dredge_df)
-mod8 <- lmer(predawn_MPa ~DBH_complete + elev_indiv + (1|plot), data = dredge_df)
-summary(mod5)
+mod2 <- lmer(midday_MPa ~ DBH_complete + elev_indiv + percent_cover + (1|plot), data = ABCO)
+summary(mod2)
+
+mod3 <- lmer(P50_MPa ~ DBH_complete + percent_cover + (1|plot), data = PILA)
+summary(mod3)
+
+mod4 <- lmer(HSM_predawn ~ DBH_complete + elev_indiv + percent_cover + (1|plot), data = ABCO)
+summary(mod4)
+
 
 # scale predictor variables
 trait_data1$DBH_complete_scaled <- as.numeric(scale(trait_data1$DBH_complete))
@@ -491,8 +544,10 @@ trait_data1$P50_MPa_scaled <- as.numeric(scale(trait_data1$P50_MPa))
 trait_data1$HSM_predawn_scaled <- as.numeric(scale(trait_data1$HSM_predawn))
 trait_data1$HSM_predawn_P50_mean_scaled <- as.numeric(scale(trait_data1$HSM_predawn_P50_mean))
 
-mod5 <- lmer(P50_MPa_scaled ~DBH_complete_scaled + percent_closure_scaled + elev_indiv_scaled + (1|plot), data = PIPO)
+# run models with scaled response and predictor variables
+mod5 <- lmer(P50_MPa_scaled ~DBH_complete_scaled + percent_closure_scaled + elev_indiv_scaled + (1|plot), data = PILA)
 summary(mod5)
+
 ```
 
 
@@ -500,10 +555,16 @@ summary(mod5)
 ```{r}
 install.packages('MuMIn')
 library(MuMIn)
+
 dredge_df <- na.omit(ABCO[, c("predawn_MPa", "elev_indiv", "DBH_complete", "percent_cover", "plot")])
 global <- lmer(predawn_MPa ~ elev_indiv * DBH_complete * percent_cover + (1|plot), data = dredge_df, na.action = na.fail, REML = FALSE)
 dredge(global)
 
+# likelihood ratio test for comparison of models by hypothesis testing versus AICc model selection
+mod6<- lmer(predawn_MPa ~ 1 + (1|plot), data = dredge_df)
+anova(mod6, mod7, mod8)
+mod7 <- lmer(predawn_MPa ~elev_indiv + (1|plot), data = dredge_df)
+mod8 <- lmer(predawn_MPa ~DBH_complete + elev_indiv + (1|plot), data = dredge_df)
 
 ```
 
@@ -605,6 +666,5 @@ ggplot(subset(trait_data2, !is.na(microsite) & !is.na(size)), aes(x = microsite,
     strip.background = element_blank(),  
     strip.text = element_text(size = 12)
   )
-mod1<- lm(P50_MPa ~ DBH_complete, data = PIPO)
-summary(mod1)
+
 ```
