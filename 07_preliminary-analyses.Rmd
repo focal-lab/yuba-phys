@@ -250,7 +250,7 @@ s2 <- ggplot(trait_data1, aes(x = DBH_complete, y = HSM_predawn_P50_mean, color 
 
 s2 
 
-s3 <- ggplot(trait_data1, aes(x = DBH_complete, y = midday_MPa, color = species)) +
+s3 <- ggplot(trait_data1, aes(x = DBH_complete, y = HSM_midday_P50_mean, color = species)) +
   geom_point(size = 3, alpha = 1) +  
   geom_smooth(method = "lm", se = TRUE, alpha = 0.3) +  
   scale_color_manual(values = c(
@@ -280,12 +280,12 @@ summary(mod1)
 # Figure 2&3 - microsite
 ```{r}
 
-m1 <- ggplot(trait_data1, aes(x = percent_cover, y = P50_MPa, color = species)) +
+m1 <- ggplot(trait_data1, aes(x = percent_cover, y = HSM_midday, color = species)) +
   geom_point(size = 3, alpha = 1) +  
   geom_smooth(method = "lm", se = TRUE,  alpha = 0.25) +
   labs(
     x = "Canopy closure (%)", 
-    y = "P50 (-MPa)", 
+    y = "HSM (MPa)", 
     color = "Species"
   ) +
   theme_bw() +
@@ -303,12 +303,12 @@ m1 <- ggplot(trait_data1, aes(x = percent_cover, y = P50_MPa, color = species)) 
 
 m1
 
-m2 <- ggplot(subset(trait_data1, !is.na(size)),aes(x = percent_cover, y = P50_MPa, color = species)) + facet_wrap(~size) +
+m2 <- ggplot(subset(trait_data1, !is.na(size)),aes(x = percent_cover, y = HSM_midday, color = species)) + facet_wrap(~size) +
   geom_point(size = 3, alpha = 1) +  
   geom_smooth(method = "lm", se = TRUE,  alpha = 0.25) +
   labs(
     x = "Canopy closure (%)", 
-    y = "P50 (-MPa)", 
+    y = "HSM (MPa)", 
     color = "Species"
   ) +
   theme_bw() +
@@ -495,7 +495,7 @@ h2 <- ggplot(data = subset(trait_data2, !type %in% c("HSM_predawn", "HSM_midday"
   geom_smooth(method = "lm", se = FALSE) +
   scale_x_continuous(breaks = seq(floor(min(trait_data1$elev_indiv)), ceiling(max(trait_data1$elev_indiv)), by = 500)) +
   scale_color_manual(values = c(
-    "P50_MPa" = "deepskyblue4", 
+    "P50_MPa" = "blue", 
     "P50_mean" = "darkblue",
     "midday_MPa" = "darkcyan",
     "predawn_MPa" = "steelblue3"
@@ -514,21 +514,169 @@ h2 <- ggplot(data = subset(trait_data2, !type %in% c("HSM_predawn", "HSM_midday"
 
 h2
 
-grid.arrange(h1,h2, nrow = 1, ncol = 2)
+h3 <- ggplot(data = subset(trait_data2, !type %in% c("HSM_predawn", "HSM_midday")),
+       aes(x = percent_cover, y = water_potential, color = type)) +
+  facet_wrap(~species, ncol = 1) +
+  geom_line(data = subset(trait_data2, type %in% c("predawn_MPa", "P50_mean")),
+            aes(x = percent_cover, y = water_potential, group = tree_ID),
+            color = "gray40",
+            size = 0.6,
+            inherit.aes = FALSE) +
+  geom_point(size = 3) +
+  geom_smooth(method = "lm", se = FALSE) +
+  scale_color_manual(values = c(
+    "P50_MPa" = "blue",
+    "P50_mean" = "darkblue",
+    "midday_MPa" = "darkcyan",
+    "predawn_MPa" = "steelblue3"
+  )) +
+  theme_bw() +
+  labs(
+    x = "Canopy closure (%)",
+    y = "Water Potential (-MPa)",
+    color = "type"
+  ) +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    legend.position = "none"
+  )
+h3
+  
+  
+  
+  
+grid.arrange(h1,h2,h3, nrow = 1, ncol = 3)
 ```
 
-# stats - Table 1 & 2
 ```{r}
-mod1 <- lmer(HSM_predawn_P50_mean_scaled ~ species + DBH_complete_scaled + elev_indiv_scaled + percent_closure_scaled + (1|plot), data = trait_data1)
+library(ggplot2)
+
+ggplot(trait_data2, aes(x = DBH_complete, y = water_potential)) +
+  geom_point(aes(shape = type, color = HSM_predawn_P50_mean), size = 3) +
+  scale_shape_manual(values = c("predawn_MPa" = 16, "P50_mean" = 17, "P50_MPa" = 17)) +  # circle, triangle
+  scale_color_gradient(low = "red", high = "blue", name = "HSM\n(P50 - predawn)") +
+  facet_wrap(~species, ncol = 1) +
+  theme_bw() +
+  labs(
+    x = "Diameter at root collar (cm)",
+    y = "Water Potential (-MPa)",
+    shape = "Type"
+  ) +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank()
+  )
+
+
+
+library(dplyr)
+library(tidyr)
+
+# Create wide format with HSM
+HSM_color_gradient <- trait_data2 %>%
+  filter(type %in% c("predawn_MPa", "P50_mean")) %>%
+  select(tree_ID, species, DBH_complete, type, water_potential) %>%
+  pivot_wider(names_from = type, values_from = water_potential) %>%
+  mutate(HSM = P50_mean - predawn_MPa)
+
+
+library(ggplot2)
+
+ggplot() +
+  # Colored connecting lines
+  geom_segment(data = HSM_color_gradient,
+               aes(x = DBH_complete, xend = DBH_complete,
+                   y = predawn_MPa, yend = P50_mean, color = HSM),
+               size = 1) +
+  
+  # Points for both predawn and P50
+  geom_point(data = HSM_color_gradient,
+             aes(x = DBH_complete, y = predawn_MPa), 
+             color = "steelblue", size = 3) +
+  
+  geom_point(data = HSM_color_gradient,
+             aes(x = DBH_complete, y = P50_mean), 
+             color = "darkblue", size = 3, shape = 17) +
+  
+  scale_color_gradient(low = "red", high = "blue", name = "HSM\n(P50 - predawn)") +
+  facet_wrap(~species, ncol = 1) +
+  theme_bw() +
+  labs(
+    x = "Diameter at root collar (cm)",
+    y = "Water Potential (-MPa)"
+  ) +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank()
+  )
+
+
+# Build polygons: x stays same, y goes from predawn to P50, loop back
+HSM_polygons <- HSM_color_gradient %>%
+  rowwise() %>%
+  mutate(
+    x1 = DBH_complete - 0.2,  # small width to create polygon
+    x2 = DBH_complete + 0.2,
+    y1 = predawn_MPa,
+    y2 = P50_mean
+  ) %>%
+  ungroup() %>%
+  rowwise() %>%
+  do(data.frame(
+    tree_ID = .$tree_ID,
+    species = .$species,
+    HSM = .$HSM,
+    x = c(.$x1, .$x2, .$x2, .$x1),
+    y = c(.$y1, .$y1, .$y2, .$y2)
+  )) %>%
+  ungroup()
+
+
+ggplot() +
+  geom_polygon(data = HSM_polygons, 
+               aes(x = x, y = y, group = tree_ID, fill = HSM),
+               alpha = 0.5, color = NA) +
+
+  geom_point(data = HSM_color_gradient, 
+             aes(x = DBH_complete, y = predawn_MPa), 
+             color = "steelblue", size = 3) +
+
+  geom_point(data = HSM_color_gradient, 
+             aes(x = DBH_complete, y = P50_mean), 
+             color = "darkblue", shape = 17, size = 3) +
+
+  scale_fill_gradient(low = "red", high = "blue", name = "HSM\n(P50 - predawn)") +
+
+  facet_wrap(~species, ncol = 1) +
+  theme_bw() +
+  labs(
+    x = "Diameter at root collar (cm)",
+    y = "Water Potential (-MPa)"
+  ) +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank()
+  )
+
+
+
+```
+
+
+# stats - Table 1, 2, 3
+```{r}
+mod1 <- lmer(HSM_predawn_P50_mean ~ DBH_complete + percent_cover + DBH_complete:percent_cover + (1|plot), data = PIPO)
 summary(mod1)
 
+trait_data1$hsm
 mod2 <- lmer(midday_MPa ~ DBH_complete + elev_indiv + percent_cover + (1|plot), data = ABCO)
 summary(mod2)
 
 mod3 <- lmer(P50_MPa ~ DBH_complete + percent_cover + (1|plot), data = PILA)
 summary(mod3)
 
-mod4 <- lmer(HSM_predawn ~ DBH_complete + elev_indiv + percent_cover + (1|plot), data = ABCO)
+mod4 <- lmer(HSM_predawn ~ species + DBH_complete + elev_indiv + percent_cover + (1|plot), data = trait_data1)
 summary(mod4)
 
 
@@ -545,8 +693,16 @@ trait_data1$HSM_predawn_scaled <- as.numeric(scale(trait_data1$HSM_predawn))
 trait_data1$HSM_predawn_P50_mean_scaled <- as.numeric(scale(trait_data1$HSM_predawn_P50_mean))
 
 # run models with scaled response and predictor variables
-mod5 <- lmer(P50_MPa_scaled ~DBH_complete_scaled + percent_closure_scaled + elev_indiv_scaled + (1|plot), data = PILA)
+mod5 <- lmer(HSM_predawn_P50_mean ~DBH_complete_scaled * percent_closure_scaled * elev_indiv_scaled + (1|plot), data = PIPO)
 summary(mod5)
+
+install.packages("emmeans")
+library(emmeans)
+
+# table 3 pairwise comparisons using emmeans
+emms1 <- emmeans(mod4, pairwise ~ species)
+summary(emms1$emmeans)
+summary(emms1$contrasts) #automatically adjusts to tukey, for multiple comparisons
 
 ```
 
@@ -556,20 +712,20 @@ summary(mod5)
 install.packages('MuMIn')
 library(MuMIn)
 
-dredge_df <- na.omit(ABCO[, c("predawn_MPa", "elev_indiv", "DBH_complete", "percent_cover", "plot")])
-global <- lmer(predawn_MPa ~ elev_indiv * DBH_complete * percent_cover + (1|plot), data = dredge_df, na.action = na.fail, REML = FALSE)
+dredge_df <- na.omit(PIPO[, c("HSM_predawn_P50_mean", "elev_indiv", "DBH_complete", "percent_cover", "plot")])
+global <- lmer(HSM_predawn_P50_mean ~ elev_indiv * DBH_complete * percent_cover + (1|plot), data = dredge_df, na.action = na.fail)
 dredge(global)
 
 # likelihood ratio test for comparison of models by hypothesis testing versus AICc model selection
-mod6<- lmer(predawn_MPa ~ 1 + (1|plot), data = dredge_df)
-anova(mod6, mod7, mod8)
-mod7 <- lmer(predawn_MPa ~elev_indiv + (1|plot), data = dredge_df)
-mod8 <- lmer(predawn_MPa ~DBH_complete + elev_indiv + (1|plot), data = dredge_df)
+mod6<- lmer(HSM_predawn_P50_mean_scaled ~ 1 + (1|plot), data = dredge_df)
+mod7 <- lmer(HSM_predawn_P50_mean_scaled ~elev_indiv_scaled + (1|plot), data = dredge_df)
+mod8 <- lmer(HSM_predawn_P50_mean_scaled ~DBH_complete_scaled + elev_indiv_scaled + (1|plot), data = dredge_df)
+mod9 <- lmer(HSM_predawn_P50_mean_scaled ~DBH_complete_scaled + elev_indiv_scaled + percent_closure_scaled +  (1|plot), data = dredge_df)
 
+anova(mod6, mod7, mod8, mod9)
 ```
 
-
-# emmeans
+# fitted models
 ```{r}
 ABCO_cleaned_data <- ABCO[!is.na(ABCO$DBH_complete) & !is.na(ABCO$percent_cover) & !is.na(ABCO$y), ]
 ABCO_cleaned_data <- ABCO[!is.na(ABCO$DBH_complete) & !is.na(ABCO$percent_cover), ]
@@ -594,50 +750,6 @@ ggplot(plot_data, aes(x = x1, y = fitted_values, color = x2)) +
        x = "Predictor 1 (x1)", y = "Fitted Values (y)") +
   scale_color_gradient(low = "blue", high = "red") +  # Color gradient for x2
   theme_minimal()
-
-# Create a new dataframe that excludes species ABMA to look at elevation
-trait_data2 <- trait_data1[trait_data1$species != "ABMA", ]
-
-mod8<- lm(trait_data2$elev_band_ft ~ stand_basal_area + species + percent_cover + stand_basal_area:species + percent_cover:species, data = trait_data2)
-summary(mod8) 
-
-# Compute estimated marginal means for percent_cover
-emm_percent_cover <- emmeans(mod7, ~ percent_cover)
-
-# Compute estimated marginal means for DBH_complete (with percent_cover held constant)
-emm_DBH <- emmeans(mod7, ~ DBH_complete)
-
-# Alternatively, for interaction, you can compute both percent_cover and DBH_complete effects together
-emm_interaction <- emmeans(mod7, ~ microsite * size)
-summary(emm_interaction)
-emm_result_df <- as.data.frame(emm_interaction)
-
-# Plot the effect of percent_cover on midday_MPa
-ggplot(emm_percent_cover, aes(x = percent_cover, y = emmean, ymin = lower.CL, ymax = upper.CL)) +
-  geom_point() +
-  geom_errorbar(width = 0.2) +  # Add error bars for confidence intervals
-  labs(x = "Percent Cover", y = "Estimated Marginal Mean of Midday MPa") +
-  theme_minimal() +
-  ggtitle("Effect of Percent Cover on Midday MPa")
-
-# Plot the interaction between percent_cover and DBH_complete
-ggplot(emm_result_df, aes(x = size, y = emmean, color = microsite)) +
-  geom_line() + 
-  geom_ribbon(aes(ymin = lower.CL, ymax = upper.CL, fill = microsite), alpha = 0.3) + 
-  labs(x = "size", y = "Estimated Marginal Mean of Midday MPa") +
-  #scale_color_viridis_c() +  # Color scale for percent_cover
-  #scale_fill_viridis_c() +  # Color scale for the ribbon fill
-  theme_minimal() +
-  ggtitle("Interaction effect between microsite and size on midday WP")
-
-# Inspect the structure of your emm_result_df
-str(emm_result_df)
-
-# Check the first few rows of the dataframe
-head(emm_result_df)
-
-# Summary statistics to see if values are within expected ranges
-summary(emm_result_df)
 
 ```
 
