@@ -93,8 +93,8 @@ vc_all <- cavitron_df %>%
          mpa = as.numeric(pressure_mpa) * -1,
          pressures = mpa,
          neg_mpa = as.numeric(pressure_mpa),
-        k = as.numeric(raw_conductance_kg_mpa_s),
-        kstem_length = as.numeric(conductivity_si_corr_t),
+        k = as.numeric(raw_conductance_kg_mpa_s),           #raw stem hydraulic conductance
+        kstem_length = as.numeric(conductivity_si_corr_t),  #hydraulic conductivity per stem length 
         #stem_id = paste(site, tree, branch, sep = "-"),
         plc_new = as.numeric(plc),
         #species = case_when(
@@ -102,12 +102,12 @@ vc_all <- cavitron_df %>%
     #species %in% c("Pinus lambertiana") ~ "PILA", 
     #species %in% c("Calocedrus decurrens") ~ "CADE", 
     #TRUE ~ as.character(species)), 
-    type = case_when(speed_class %in% c("a") ~ "kmax", 
+    type = case_when(speed_class %in% c("a") ~ "kmax", #maximum conductivity point (from speed class "a")
                      speed_class %in% c("b", "c","d", "e", "f", "g", "h", "i") ~ "VC", 
-      TRUE ~ as.character(speed_class))) %>% 
+      TRUE ~ as.character(speed_class))) %>%  # everything else = speed classes "b" to "i")
   select(tree, mpa, neg_mpa, k, kstem_length, plc_new, type) %>% 
   mutate(size = as.factor("B"), 
-         plc_new = case_when(
+         plc_new = case_when(  #set bounds for PLC new from 0-100
            plc_new < 0 ~ 0, 
            plc_new > 100 ~ 100,
            TRUE ~ as.numeric(plc_new)
@@ -117,12 +117,12 @@ vc_all <- cavitron_df %>%
 vc_all2 <- vc_all %>% 
   group_by(tree) %>% 
   mutate(group = case_when(
-    mpa == min(mpa) ~ "a",
-    TRUE ~ as.character("b"))) %>% 
+    mpa == min(mpa) ~ "a",              #if mpa is the minimum mpa for that tree, assign group "a" (kmax)
+    TRUE ~ as.character("b"))) %>%      #otherwise assign it to group "b"
   group_by(tree) %>% 
-  mutate(mean_kstem_a = mean(kstem_length[group == 'a'], na.rm = T)) %>% 
+  mutate(mean_kstem_a = mean(kstem_length[group == 'a'], na.rm = T)) %>%  # mean of the kmax values
   ungroup() %>% 
-  mutate(plc_new = 100-(100*kstem_length/mean_kstem_a))%>% 
+  mutate(plc_new = 100-(100*kstem_length/mean_kstem_a))%>%   #calculate PLC from 
   drop_na(plc_new)
 
 ```
