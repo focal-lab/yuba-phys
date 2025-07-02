@@ -18,10 +18,14 @@ trait_data1$microsite <- cut(
   right = TRUE
 )
 
-## make a table for counts of seedlings and saplings per species
-counts_table <- table(trait_data1$species[trait_data1$species %in% c('ABCO', 'ABMA','PIPO','PILA')],
-                      trait_data1$size_class[trait_data1$size_class %in% c('seedling', 'sapling')],
-                      trait_data1$elevation[trait_data1$elevation %in% c('low', 'high')])
+counts_table <- trait_data1 %>%
+  filter(
+    species %in% c('ABCO', 'ABMA', 'PIPO', 'PILA'),
+    size_class %in% c('seedling', 'sapling')
+  ) %>%
+  select(species, size_class, plot) %>%
+  table()
+
 
 ## make a table for counts of seedlings and saplings per species by elevation and microsite
 summary_table <- trait_data1 %>%
@@ -76,7 +80,7 @@ hist(trait_data1$seedling_height_cm)
 # create DBH intervals and count DBH by species and elevation
 DBH_intervals <- trait_data1 %>%
   mutate(DBH_interval = cut(
-    DBH_cm,
+    diameter_cm,
     breaks = seq(0, 14, by = 2),
     include.lowest = TRUE,
     right = FALSE,
@@ -88,9 +92,9 @@ DBH_intervals <- trait_data1 %>%
     .groups = 'drop'
   )
 
-trait_data1$DBH <- as.numeric(as.character(trait_data1$DBH_cm))
+trait_data1$diameter <- as.numeric(as.character(trait_data1$diameter_cm))
 
-hist(trait_data1$DBH)
+hist(trait_data1$diameter)
 
 # make a table to visualize the representation of vulnerability curves across species, 
 #size class, elevation and microsite
@@ -108,35 +112,36 @@ P50_elev_table <- trait_data1 %>%
   group_by(species, elevation, size_class) %>%
   summarize(count = n(), .groups = 'drop')
 
-plot(trait_data1$DBH~trait_data1$seedling_height_cm)
-mod1 <- lm(trait_data1$DBH~trait_data1$seedling_height_cm)
+plot(trait_data1$diameter~trait_data1$seedling_height_cm)
+mod1 <- lm(trait_data1$diameter~trait_data1$seedling_height_cm)
 summary(mod1)
 
 # create a training model using seedlings with height <= 100cm 
 complete_cases <- trait_data1 %>%
-  filter(!is.na(DBH) & seedling_height_cm <= 100)
+  filter(!is.na(diameter) & seedling_height_cm <= 100)
 
-missing_cases <- trait_data1 %>% filter(is.na(DBH))
-mod2 <- lm(DBH ~ seedling_height_cm, data = complete_cases)
+missing_cases <- trait_data1 %>% filter(is.na(diameter))
+mod2 <- lm(diameter ~ seedling_height_cm, data = complete_cases)
 summary(mod2) # r^2 decreased when filtering to <= 100cm
 
-trait_data1$predicted_DBH <- NA
+trait_data1$predicted_diameter <- NA
 
 if (nrow(missing_cases) > 0) {
   predicted_values <- predict(mod2, newdata = missing_cases)
-  trait_data1$predicted_DBH[is.na(trait_data1$DBH)] <- predicted_values
+  trait_data1$predicted_diameter[is.na(trait_data1$diameter)] <- predicted_values
 }
 
 # create a new column that combines observed and predicted DBH values
-trait_data1$DBH_complete <- ifelse(is.na(trait_data1$DBH), trait_data1$predicted_DBH, trait_data1$DBH)
+trait_data1$diameter_complete <- ifelse(is.na(trait_data1$diameter), trait_data1$predicted_diameter, 
+                                        trait_data1$diameter)
 
 library('ggplot2')
 #compare trends between DBH and seedling height for actual and predicted data
-ggplot(trait_data1, aes(x = seedling_height_cm, y = DBH)) +
+ggplot(trait_data1, aes(x = seedling_height_cm, y = diameter)) +
   geom_point(color = "blue") +
-  geom_point(aes(y = predicted_DBH), color = "red") +
+  geom_point(aes(y = predicted_diameter), color = "red") +
   geom_smooth(method = "lm", se = FALSE, color = "blue", linetype = "dashed") +
-  geom_smooth(aes(y = predicted_DBH), method = "lm", se = FALSE, color = "red", linetype = "dashed") +
+  geom_smooth(aes(y = predicted_diameter), method = "lm", se = FALSE, color = "red", linetype = "dashed") +
   theme_bw() + 
   theme(
     panel.grid.major = element_blank(),
@@ -144,8 +149,8 @@ ggplot(trait_data1, aes(x = seedling_height_cm, y = DBH)) +
 
 # are predicted and observed DBH values statistically different?
 t_test <- t.test(
-  trait_data1$DBH[!is.na(trait_data1$DBH) & !is.na(trait_data1$predicted_DBH)],
-  trait_data1$predicted_DBH[!is.na(trait_data1$DBH) & !is.na(trait_data1$predicted_DBH)],
+  trait_data1$DBH[!is.na(trait_data1$diameter) & !is.na(trait_data1$predicted_diameter)],
+  trait_data1$predicted_diameter[!is.na(trait_data1$diameter) & !is.na(trait_data1$predicted_diameter)],
   paired = TRUE
 )
 print(t_test)
@@ -172,7 +177,7 @@ trait_data1$HSM_predawn <- trait_data1$P50_MPa - trait_data1$predawn_MPa
 trait_data1$HSM_midday  <- trait_data1$P50_MPa - trait_data1$midday_MPa
 
 trait_data1 <- trait_data1 %>%
-  mutate(size = ifelse(DBH_complete < 2.5, "seedling", "sapling"))
+  mutate(size = ifelse(diameter_complete < 2.5, "seedling", "sapling"))
 
 trait_data1 <- trait_data1[, !(names(trait_data1) %in% "HSM_MPa")]
 
