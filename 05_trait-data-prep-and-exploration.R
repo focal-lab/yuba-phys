@@ -158,23 +158,64 @@ print(t_test)
 # preliminary analyses
 write.csv(trait_data1, "trait_data1.csv", row.names = FALSE)
 
-# merge P50 data with main trait dataframe 
-
-## subset dataframe to include only seedlings and saplings for ABCO, PIPO, PILA, and ABMA
-#yuba_phys_P50_2024 <- yuba_phys_P50[yuba_phys_P50$size_class %in% c('seedling', 'sapling'), ]
-
-#yuba_phys_P50_2024 <- yuba_phys_P50_2024[yuba_phys_P50_2024$species %in% c('ABCO', 'ABMA','PIPO', 'PILA'), ]
 
 trait_data1$P50_MPa <- as.numeric(as.character(trait_data1$P50_MPa))
 
-#P50 <- yuba_phys_P50_2024[, c("tree_ID", "P50_MPa", "P50_branch_1", "P50_branch_2", "P50_branch_3")]
+# interpolate P50 values for individuals that P50 wasnt measure
+# create a training dataset
+P50_measured <- trait_data1 %>%
+  filter(!is.na(P50_MPa))
 
-#trait_data1 <- trait_data1[, !(names(trait_data1) %in% "P50_MPa")]
+P50_missing <- trait_data1 %>% filter(is.na(P50_MPa))
 
-#trait_data2 <- merge(trait_data1, P50, by = "tree_ID")
+mod3 <- lm(P50_MPa ~ species + size + percent_cover + elev_indiv, data = P50_measured)
+summary(mod3)
 
-trait_data1$HSM_predawn <- trait_data1$P50_MPa - trait_data1$predawn_MPa
-trait_data1$HSM_midday  <- trait_data1$P50_MPa - trait_data1$midday_MPa
+trait_data1$predicted_P50 <- NA
+
+if (nrow(P50_missing) > 0) {
+  P50_predicted_values <- predict(mod3, newdata = P50_missing)
+  trait_data1$predicted_P50[is.na(trait_data1$P50_MPa)] <- P50_predicted_values
+}
+
+# create a new column that combines observed and predicted DBH values
+trait_data1$P50_complete <- ifelse(is.na(trait_data1$P50_MPa), trait_data1$predicted_P50, 
+                                        trait_data1$P50_MPa)
+
+#compare trends between P50 measured and P50 predicted
+# Base plot
+
+# Plot both measured and predicted P50 values over size (or diameter)
+ggplot() +
+  # Measured P50 points
+  geom_point(
+    data = trait_data1 %>% filter(!is.na(P50_MPa)),
+    aes(x = diameter_complete, y = P50_MPa, color = "Measured P50"),
+    alpha = 0.7
+  ) +
+  # Predicted P50 points (generated on the fly)
+  geom_point(
+    data = trait_data1 %>% filter(is.na(P50_MPa)),
+    aes(x = diameter_complete, y = predict(mod3, newdata = trait_data1 %>% filter(is.na(P50_MPa))), color = "Predicted P50"),
+    alpha = 0.7
+  ) +
+  scale_color_manual(
+    name = NULL,
+    values = c("Measured P50" = "steelblue", "Predicted P50" = "darkorange")
+  ) +
+  labs(
+    title = "Measured and Predicted P50 Values vs. Size",
+    x = "Size (e.g., Diameter)",
+    y = "P50 (MPa)"
+  ) +
+  theme_minimal()
+
+
+trait_data1$HSM_predawn_2024 <- trait_data1$P50_MPa - trait_data1$predawn_MPa_2024
+trait_data1$HSM_midday_2024  <- trait_data1$P50_MPa - trait_data1$midday_MPa_2024
+
+trait_data1$HSM_predawn_2025 <- trait_data1$P50_MPa - trait_data1$predawn_MPa_2025
+trait_data1$HSM_midday_2025 <- trait_data1$P50_MPa - trait_data1$midday_MPa_2025
 
 trait_data1 <- trait_data1 %>%
   mutate(size = ifelse(diameter_complete < 2.5, "seedling", "sapling"))
@@ -183,9 +224,11 @@ trait_data1 <- trait_data1[, !(names(trait_data1) %in% "HSM_MPa")]
 
 ## see PLC script to make sure P50 means are loaded 
 
-trait_data1$HSM_predawn_P50_mean <- trait_data1$P50_mean - trait_data1$predawn_MPa
-trait_data1$HSM_midday_P50_mean  <- trait_data1$P50_mean - trait_data1$midday_MPa
+trait_data1$HSM_predawn_P50_mean_2024 <- trait_data1$P50_mean - trait_data1$predawn_MPa_2024
+trait_data1$HSM_midday_P50_mean_2024  <- trait_data1$P50_mean - trait_data1$midday_MPa_2024
 
+trait_data1$HSM_predawn_P50_mean_2025 <- trait_data1$P50_mean - trait_data1$predawn_MPa_2025
+trait_data1$HSM_midday_P50_mean_2025  <- trait_data1$P50_mean - trait_data1$midday_MPa_2025
 
 ABCO <- trait_data1[trait_data1$species == 'ABCO',]
 PILA <- trait_data1[trait_data1$species == 'PILA',]
@@ -195,7 +238,7 @@ ABMA <- trait_data1[trait_data1$species == 'ABMA',]
 
 trait_data2 <- trait_data1 %>%
   pivot_longer(
-    cols = c(predawn_MPa, midday_MPa, P50_MPa, P50_mean, HSM_predawn, HSM_midday),
+    cols = c(predawn_MPa_2025, midday_MPa_2025, P50_MPa, P50_mean, P50_complete, HSM_predawn_2025, HSM_midday_2025),
     names_to = "type",
     values_to = "water_potential"
   )
