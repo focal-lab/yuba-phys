@@ -252,7 +252,7 @@ s2 <- ggplot(trait_data1, aes(x = diameter_complete, y = midday_MPa_combined, co
 
 s2 
 
-s3 <- ggplot(trait_data2, aes(x = diameter_complete, y = P50_complete, color = species)) +
+s3 <- ggplot(trait_data1, aes(x = diameter_complete, y = P50_mean, color = species)) +
   geom_point(size = 3, alpha = 1) +  
   geom_smooth(method = "lm", se = TRUE, alpha = 0.3) +  
   scale_color_manual(values = c(
@@ -361,7 +361,7 @@ grid.arrange(s1, s2, s4, s5, s3, nrow = 3, ncol = 2)
 
 ```{r}
 
-r1 <- ggplot(trait_data2, aes(y = HSM_midday_P50_mean, x = predawn_MPa_combined, color = species)) +
+r1 <- ggplot(trait_data1, aes(y = HSM_midday_P50_mean, x = predawn_MPa_combined, color = species)) +
   geom_point(size = 3, alpha = 1) +
   geom_smooth(method = "lm", se = TRUE, alpha = 0.2, linewidth = 1) +  
   labs(
@@ -385,7 +385,7 @@ r1 <- ggplot(trait_data2, aes(y = HSM_midday_P50_mean, x = predawn_MPa_combined,
 r1
 
 
-r2 <- ggplot(trait_data2, aes(y = P50_complete, x = predawn_MPa_combined, color = species)) +
+r2 <- ggplot(trait_data1, aes(y = P50_mean, x = predawn_MPa_combined, color = species)) +
   geom_point(size = 3, alpha = 1) +
   geom_smooth(method = "lm", se = TRUE, alpha = 0.2, linewidth = 1) +  
   labs(
@@ -457,7 +457,7 @@ legend("topright", legend = c("2024", "2025"), col = c("blue", "red"), lty = 1, 
 # Figure 3 - elev & microsite
 ```{r}
 
-m1 <- ggplot(trait_data2, aes(x = percent_cover, y = P50_complete, color = species)) +
+m1 <- ggplot(trait_data1, aes(x = percent_cover, y = P50_combined, color = species)) +
   geom_point(size = 3, alpha = 1) +  
   geom_smooth(method = "lm", se = TRUE,  alpha = 0.25) +
   labs(
@@ -480,7 +480,7 @@ m1 <- ggplot(trait_data2, aes(x = percent_cover, y = P50_complete, color = speci
 
 m1
 
-m2 <- ggplot(trait_data2, aes(x = percent_cover, y = HSM_midday_P50_mean, color = species)) +
+m2 <- ggplot(trait_data1, aes(x = percent_cover, y = HSM_midday_P50_mean, color = species)) +
   geom_point(size = 3, alpha = 1) +  
   geom_smooth(method = "lm", se = TRUE,  alpha = 0.25) +
   labs(
@@ -504,7 +504,7 @@ m2 <- ggplot(trait_data2, aes(x = percent_cover, y = HSM_midday_P50_mean, color 
 
 m2
 
-e1 <- ggplot(subset(trait_data2, species != "ABMA"), aes(x = elev_indiv, y = HSM_midday_P50_mean, color = species))+
+e1 <- ggplot(subset(trait_data1, species != "ABMA"), aes(x = elev_indiv, y = HSM_midday_P50_mean, color = species))+
   geom_point(size = 3, alpha = 1) +  
   geom_smooth(method = "lm", se = TRUE,  alpha = 0.25) +
   labs(
@@ -525,12 +525,13 @@ e1 <- ggplot(subset(trait_data2, species != "ABMA"), aes(x = elev_indiv, y = HSM
   #scale_y_reverse() + 
   theme(
     panel.grid.major = element_blank(),
-    panel.grid.minor = element_blank()
+    panel.grid.minor = element_blank(),
+    legend.position = "none"
   )
 
 e1
 
-e2 <- ggplot(subset(trait_data2, species != "ABMA"), aes(x = elev_indiv, y = P50_MPa, color = species)) +
+e2 <- ggplot(subset(trait_data1, species != "ABMA"), aes(x = elev_indiv, y = P50_mean, color = species)) +
   geom_point(size = 3, alpha = 1) +  
   geom_smooth(method = "lm", se = TRUE,  alpha = 0.25) +
   labs(
@@ -551,14 +552,13 @@ e2 <- ggplot(subset(trait_data2, species != "ABMA"), aes(x = elev_indiv, y = P50
   #scale_y_reverse() + 
   theme(
     panel.grid.major = element_blank(),
-    panel.grid.minor = element_blank(),
-    legend.position = "none"
+    panel.grid.minor = element_blank()
   )
 
 e2
 
 
-grid.arrange(r1, r2, m2, m1, e2, e1, nrow = 3, ncol = 2)
+grid.arrange(r1, r2, m2, m1, e1, e2, nrow = 3, ncol = 2)
 
 e3 <- ggplot(
   subset(trait_data1, species != "ABMA"),
@@ -699,7 +699,7 @@ grid.arrange(h1,h3,h2, nrow = 1, ncol = 3)
 
 ```{r}
 
-g1 <- ggplot(trait_data2, aes(x = diameter_complete, y = internode_length_1_2, color = species)) +
+g1 <- ggplot(trait_data1, aes(x = diameter_complete, y = internode_length_1_2, color = species)) +
   geom_point(size = 3, alpha = 1) +  
   geom_smooth(method = "lm", se = TRUE, alpha = 0.3) +  
   scale_color_manual(values = c(
@@ -742,7 +742,7 @@ g2 <- ggplot(trait_data1, aes(x = predawn_MPa_combined, y = internode_length_1_2
 g2
 
 
-g3 <- ggplot(trait_data2, aes(x =HSM_midday_P50_mean_2025 , y = trait_data2$internode_length_0_1, color = species)) +
+g3 <- ggplot(trait_data1, aes(x =HSM_midday_P50_mean , y = internode_length_1_2, color = species)) +
   geom_point(size = 3, alpha = 1) +
   geom_smooth(method = "lm", se = TRUE, alpha = 0.2, linewidth = 1) +  
   labs(
@@ -767,7 +767,7 @@ g3 <- ggplot(trait_data2, aes(x =HSM_midday_P50_mean_2025 , y = trait_data2$inte
 
 g3
 
-g4 <- ggplot(trait_data2, aes(x = P50_complete, y = internode_length_1_2, color = species)) +
+g4 <- ggplot(trait_data1, aes(x = P50_mean, y = internode_length_1_2, color = species)) +
   geom_point(size = 3, alpha = 1) +  
   geom_smooth(method = "lm", se = TRUE, alpha = 0.3) +  
   scale_color_manual(values = c(
@@ -788,7 +788,7 @@ g4 <- ggplot(trait_data2, aes(x = P50_complete, y = internode_length_1_2, color 
 
 g4
 
-g5 <- ggplot(trait_data2, aes(x = percent_cover, y = internode_length_1_2, color = species)) +
+g5 <- ggplot(trait_data1, aes(x = percent_cover, y = internode_length_1_2, color = species)) +
   geom_point(size = 3, alpha = 1) +  
   geom_smooth(method = "lm", se = TRUE, alpha = 0.3) +  
   scale_color_manual(values = c(
@@ -809,7 +809,7 @@ g5 <- ggplot(trait_data2, aes(x = percent_cover, y = internode_length_1_2, color
 
 g5
 
-g6 <- ggplot(trait_data2, aes(x = elev_indiv, y = internode_length_1_2, color = species)) +
+g6 <- ggplot(trait_data1, aes(x = elev_indiv, y = internode_length_1_2, color = species)) +
   geom_point(size = 3, alpha = 1) +  
   geom_smooth(method = "lm", se = TRUE, alpha = 0.3) +  
   scale_color_manual(values = c(

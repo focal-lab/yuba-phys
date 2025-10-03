@@ -195,5 +195,38 @@ trait_data1 <- trait_data1 %>%
 # in trait_data2
 # and now we can recalculate HSM using P50 complete (observed and predicted values) and 2024-2025 
 # combined WP data
-trait_data1$HSM_predawn_P50_mean <- trait_data2$P50_complete - trait_data1$predawn_MPa_combined
-trait_data1$HSM_midday_P50_mean  <- trait_data2$P50_complete - trait_data1$midday_MPa_combined
+
+# average P50 across years, create a vector of one P50 value per tree_ID
+# P50 mean is the average of both years for measured and predicted observations
+P50_mean <- trait_data2 %>%
+  group_by(tree_ID) %>%
+  summarise(P50_mean = mean(P50_complete, na.rm = TRUE), .groups = "drop")
+
+# merge P50_mean with trait_data1
+trait_data1 <- trait_data1 %>%
+  left_join(P50_mean, by = "tree_ID")
+
+# calculate HSM using the combined predawn and midday potentials
+trait_data1 <- trait_data1 %>%
+  mutate(
+    HSM_predawn_P50_mean = P50_mean - predawn_MPa_combined,
+    HSM_midday_P50_mean  = P50_mean - midday_MPa_combined
+  )
+
+# P50_MPa in trait_data2 is the pooled raw P50 data. lets aggregate that by averaging across years, and join
+# that to trait_data1
+
+# aggregate P50_MPa across years by tree_ID (mean per tree)
+P50_combined <- trait_data2 %>%
+  group_by(tree_ID) %>%
+  summarise(P50_combined = mean(P50_MPa, na.rm = TRUE), .groups = "drop")
+
+# Step 2: Join the average P50 back to trait_data1
+trait_data1 <- trait_data1 %>%
+  left_join(P50_combined, by = "tree_ID")
+
+# P50_complete = 
+# P50_combined = 
+# P50_mean = 
+
+
