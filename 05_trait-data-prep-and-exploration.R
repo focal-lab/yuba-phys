@@ -137,7 +137,6 @@ ggplot() +
     values = c("Measured" = "solid", "Predicted" = "dashed")
   ) +
   labs(
-    title = "Measured and Predicted P50 Trendlines by Species",
     x = "Diameter at Root Collar (cm)",
     y = "P50 (-MPa)",
     color = "Species"
@@ -175,9 +174,9 @@ ABMA <- trait_data2[trait_data2$species == 'ABMA',]
 trait_data1 <- trait_data1[trait_data1$tree_ID != 94, ]
 trait_data2 <- trait_data2[trait_data2$tree_ID != 94, ]
 
-mod3 <- lmer(predawn_MPa ~ diameter + percent_cover + year + elev_indiv + species 
+mod4 <- lmer(predawn_MPa ~ diameter + percent_cover + year + elev_indiv + species 
              + (1|plot), data = trait_data2)
-summary(mod3)
+summary(mod4)
 
 # determine whether WP and P50 values are different between years to determine how data is pooled
 t.test(predawn_MPa ~ year, data = trait_data2, paired = FALSE)
@@ -190,6 +189,11 @@ trait_data1 <- trait_data1 %>%
 
 trait_data1 <- trait_data1 %>%
   mutate(midday_MPa_combined = coalesce(midday_MPa_2025, midday_MPa_2024))
+
+# unique tree_ID from 2025 = 265, 277                 
+# unique tree_ID from 2024 = 82, 81
+# 23% of total predawns (347) is coming from 2024
+# 22% of total middays (358) is coming from 2024
 
 # add P50_complete to trait_data1, its derived from both P50_MPa_2024 and P50_MPa_2025 
 # in trait_data2
@@ -228,5 +232,18 @@ trait_data1 <- trait_data1 %>%
 # P50_complete = 
 # P50_combined = 
 # P50_mean = 
+
+# lets convert to long format again but by WP type instead of year this time 
+trait_data3 <- trait_data1 %>%
+  pivot_longer(
+    cols = c(
+      predawn_MPa_combined,
+      midday_MPa_combined,
+      P50_combined,
+      P50_mean
+    ),
+    names_to = "type",
+    values_to = "water_potential"
+  )
 
 

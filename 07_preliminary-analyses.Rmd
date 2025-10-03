@@ -252,7 +252,7 @@ s2 <- ggplot(trait_data1, aes(x = diameter_complete, y = midday_MPa_combined, co
 
 s2 
 
-s3 <- ggplot(trait_data1, aes(x = diameter_complete, y = P50_mean, color = species)) +
+s3 <- ggplot(trait_data1, aes(x = diameter_complete, y = P50_combined, color = species)) +
   geom_point(size = 3, alpha = 1) +  
   geom_smooth(method = "lm", se = TRUE, alpha = 0.3) +  
   scale_color_manual(values = c(
@@ -355,6 +355,7 @@ s5 <- ggplot(trait_data2, aes(x = diameter_complete, y = HSM_midday_P50_mean, co
 
 s5
 grid.arrange(s1, s2, s4, s5, s3, nrow = 3, ncol = 2)
+
 
 ```
 # Figure 2- predawn
@@ -599,10 +600,10 @@ e3
 # Figure 4 - HSM 
 ```{r}
 
-h1 <- ggplot(data = subset(trait_data2, !type %in% c("HSM_predawn_2025", "HSM_midday_2025")),
+h1 <- ggplot(data = subset(trait_data3),
        aes(x = diameter_complete, y = water_potential, color = type)) +
   facet_wrap(~ factor(species, levels = c("PILA", "PIPO", "ABCO", "ABMA")), nrow = 4) +
-  geom_line(data = subset(trait_data2, type %in% c("midday_MPa_2025", "P50_mean")),
+  geom_line(data = subset(trait_data3, type %in% c("midday_MPa_combined", "P50_mean")),
             aes(x = diameter_complete, y = water_potential, group = tree_ID),
             color = "gray40",
             size = 0.6,
@@ -610,11 +611,10 @@ h1 <- ggplot(data = subset(trait_data2, !type %in% c("HSM_predawn_2025", "HSM_mi
   geom_point(size = 2) +
   geom_smooth(method = "lm", se = FALSE) +
   scale_color_manual(values = c(
-    "P50_MPa" = "blue",
+    "P50_combined" = "blue",
     "P50_mean" = "darkblue",
-    "P50_complete" = "darkgray",
-    "midday_MPa_2025" = "darkcyan",
-    "predawn_MPa_2025" = "steelblue3"
+    "midday_MPa_combined" = "darkcyan",
+    "predawn_MPa_combined" = "steelblue3"
   )) +
   theme_bw() +
   labs(
@@ -630,10 +630,10 @@ h1 <- ggplot(data = subset(trait_data2, !type %in% c("HSM_predawn_2025", "HSM_mi
 h1
 
 
-h2 <- ggplot(data = subset(trait_data2, !type %in% c("HSM_predawn_2025", "HSM_midday_2025")),
+h2 <- ggplot(data = subset(trait_data3),
        aes(x = elev_indiv, y = water_potential, color = type)) +
   facet_wrap(~ factor(species, levels = c("PILA", "PIPO", "ABCO", "ABMA")), nrow = 4) +
-  geom_line(data = subset(trait_data2, type %in% c("midday_MPa_2025", "P50_mean")),
+  geom_line(data = subset(trait_data3, type %in% c("midday_MPa_combined", "P50_mean")),
             aes(x = elev_indiv, y = water_potential, group = tree_ID),
             color = "gray40",
             size = 0.6,
@@ -642,10 +642,10 @@ h2 <- ggplot(data = subset(trait_data2, !type %in% c("HSM_predawn_2025", "HSM_mi
   geom_smooth(method = "lm", se = FALSE) +
   scale_x_continuous(breaks = seq(floor(min(trait_data1$elev_indiv)), ceiling(max(trait_data1$elev_indiv)), by = 500)) +
   scale_color_manual(values = c(
-    "P50_MPa" = "blue", 
+    "P50_combined" = "blue", 
     "P50_mean" = "darkblue",
-    "midday_MPa_2025" = "darkcyan",
-    "predawn_MPa_2025" = "steelblue3"
+    "midday_MPa_combined" = "darkcyan",
+    "predawn_MPa_combined" = "steelblue3"
   )) +
   theme_bw() +
   labs(
@@ -661,10 +661,10 @@ h2 <- ggplot(data = subset(trait_data2, !type %in% c("HSM_predawn_2025", "HSM_mi
 
 h2
 
-h3 <- ggplot(data = subset(trait_data2, !type %in% c("HSM_predawn_2025", "HSM_midday_2025")),
+h3 <- ggplot(data = subset(trait_data3), 
        aes(x = percent_cover, y = water_potential, color = type)) +
   facet_wrap(~ factor(species, levels = c("PILA", "PIPO", "ABCO", "ABMA")), nrow = 4) +
-  geom_line(data = subset(trait_data2, type %in% c("midday_MPa", "P50_mean")),
+  geom_line(data = subset(trait_data3, type %in% c("midday_MPa_combined", "P50_mean")),
             aes(x = percent_cover, y = water_potential, group = tree_ID),
             color = "gray40",
             size = 0.6,
@@ -672,10 +672,10 @@ h3 <- ggplot(data = subset(trait_data2, !type %in% c("HSM_predawn_2025", "HSM_mi
   geom_point(size = 2) +
   geom_smooth(method = "lm", se = FALSE) +
   scale_color_manual(values = c(
-    "P50_MPa" = "blue",
+    "P50_combined" = "blue",
     "P50_mean" = "darkblue",
-    "midday_MPa_2025" = "darkcyan",
-    "predawn_MPa_2025" = "steelblue3"
+    "midday_MPa_combined" = "darkcyan",
+    "predawn_MPa_combined" = "steelblue3"
   )) +
   theme_bw() +
   labs(
