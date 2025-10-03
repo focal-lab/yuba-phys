@@ -1770,4 +1770,191 @@ trait_data1 <- trait_data1 %>%
   ))
 ```
 
+# 2025 curves
+```{r}
+DATADIR = "/Users/anjumgujral/Box Sync/yuba-phys_data/P50"
+
+#cavitron_files <- list.files(path = here::here("P50", "P50_individual"), pattern = "*.csv", full.names = TRUE, include.dirs = T, recursive = T) 
+
+cavitron_files_2025 <- c(
+  here::here("P50", "p50_8_28_2025.csv"),
+  here::here("P50", "p50_9_15_2025.csv")
+)
+
+# Read and combine CSV files
+all_cavitron_data_2025<- cavitron_files_2025 %>%
+  map_dfr(~read_csv(.x, skip = 1, col_names = read_csv(.x, n_max = 1)))
+
+glimpse(all_cavitron_data_2025)
+# Assuming you have a combined dataframe called combined_data
+
+# Initialize list to store dataframes
+dataframes <- list()
+
+# Track current header and rows under it
+current_header <- NULL
+current_data <- NULL
+
+some_condition <- function(row) {
+  first_cell <- as.character(row[1])
+  grepl("Date_time", first_cell, ignore.case = TRUE)
+}
+
+for (i in 1:nrow(all_cavitron_data_2025)) {
+  row <- all_cavitron_data_2025[i, ]
+  
+  if (some_condition(row)) {
+    # If we're starting a new section, save the previous one first
+    if (!is.null(current_data)) {
+      df <- setNames(current_data, current_header)
+      dataframes <- append(dataframes, list(df))
+    }
+    
+    # Set new header and reset current data
+    current_header <- as.character(row)
+    current_data <- NULL
+    
+  } else {
+    # Accumulate rows under the current header
+    if (!is.null(current_header)) {
+      if (is.null(current_data)) {
+        current_data <- row
+      } else {
+        current_data <- bind_rows(current_data, row)
+      }
+    }
+  }
+}
+
+# After the loop, don’t forget to save the last chunk
+if (!is.null(current_data)) {
+  df <- setNames(current_data, current_header)
+  dataframes <- append(dataframes, list(df))
+}
+
+# Now combine all
+cavitron_2025_df <- bind_rows(dataframes) %>%
+  janitor::clean_names()
+
+
+vc_all_2025 <- cavitron_2025_df %>%
+  janitor::clean_names() %>%
+  filter(!is.na(sample_ref_1)) %>%    # Keep only rows with tree IDs
+  mutate(tree = as.numeric(sample_ref_1),
+         mpa = as.numeric(pressure_mpa) * -1,
+         pressures = mpa,
+         neg_mpa = as.numeric(pressure_mpa),
+        k = as.numeric(raw_conductance_kg_mpa_s),           #raw stem hydraulic conductance
+        kstem_length = as.numeric(conductivity_si_corr_t),  #hydraulic conductivity per stem length 
+        #stem_id = paste(site, tree, branch, sep = "-"),
+        plc_new = as.numeric(plc),
+        #species = case_when(
+    #species %in% c("Abies concolor") ~ "ABCO", 
+    #species %in% c("Pinus lambertiana") ~ "PILA", 
+    #species %in% c("Calocedrus decurrens") ~ "CADE", 
+    #TRUE ~ as.character(species)), 
+    type = case_when(speed_class %in% c("a") ~ "kmax", #maximum conductivity point (from speed class "a")
+                     speed_class %in% c("b", "c","d", "e", "f", "g", "h", "i") ~ "VC", 
+      TRUE ~ as.character(speed_class))) %>%  # everything else = speed classes "b" to "i")
+  select(tree, mpa, neg_mpa, k, kstem_length, plc_new, type) %>% 
+  mutate(size = as.factor("B"), 
+         plc_new = case_when(  #set bounds for PLC new from 0-100
+           plc_new < 0 ~ 0, 
+           plc_new > 100 ~ 100,
+           TRUE ~ as.numeric(plc_new)
+         )) %>% 
+  drop_na(plc_new)
+
+vc_all_2025_2 <- vc_all_2025 %>% 
+  group_by(tree) %>% 
+  mutate(group = case_when(
+    mpa == min(mpa) ~ "a",              #if mpa is the minimum mpa for that tree, assign group "a" (kmax)
+    TRUE ~ as.character("b"))) %>%      #otherwise assign it to group "b"
+  group_by(tree) %>% 
+  mutate(mean_kstem_a = mean(kstem_length[group == 'a'], na.rm = T)) %>%  # mean of the kmax values
+  ungroup() %>% 
+  mutate(plc_new = 100-(100*kstem_length/mean_kstem_a))%>%   #calculate PLC from 
+  drop_na(plc_new)
+
+```
+
+
+```{r}
+
+cavitron_files_2025 <- c(
+  here::here("P50", "p50_8_28_2025.csv"),
+  here::here("P50", "p50_9_15_2025.csv")
+)
+
+# Read both CSVs, skip first line (metadata), use second line as header, combine
+cavitron_2025_df <- cavitron_files_2025 %>%
+  map_dfr(~ read_csv(.x, skip = 1, col_names = TRUE)) %>%
+  janitor::clean_names()
+
+# Now run your data cleaning and transformation pipeline
+vc_all_2025 <- cavitron_2025_df %>%
+  filter(!is.na(sample_ref_1)) %>%    # Keep only rows with tree IDs
+  mutate(tree = as.numeric(sample_ref_1),
+         mpa = as.numeric(pressure_mpa) * -1,
+         pressures = mpa,
+         neg_mpa = as.numeric(pressure_mpa),
+         k = as.numeric(raw_conductance_kg_mpa_s),           #raw stem hydraulic conductance
+         kstem_length = as.numeric(conductivity_si_corr_t),  #hydraulic conductivity per stem length 
+         plc_new = as.numeric(plc),
+         type = case_when(
+           speed_class %in% c("a") ~ "kmax", #maximum conductivity point (from speed class "a")
+           speed_class %in% c("b", "c","d", "e", "f", "g", "h", "i") ~ "VC", 
+           TRUE ~ as.character(speed_class)
+         )) %>%  
+  select(tree, mpa, neg_mpa, k, kstem_length, plc_new, type) %>% 
+  mutate(size = as.factor("B"), 
+         plc_new = case_when(  #set bounds for PLC new from 0-100
+           plc_new < 0 ~ 0, 
+           plc_new > 100 ~ 100,
+           TRUE ~ as.numeric(plc_new)
+         )) %>% 
+  drop_na(plc_new)
+
+vc_all_2025_2 <- vc_all_2025 %>% 
+  group_by(tree) %>% 
+  mutate(group = case_when(
+    mpa == min(mpa) ~ "a",              #if mpa is the minimum mpa for that tree, assign group "a" (kmax)
+    TRUE ~ "b")) %>%      
+  group_by(tree) %>% 
+  mutate(mean_kstem_a = mean(kstem_length[group == 'a'], na.rm = TRUE)) %>%  # mean of the kmax values
+  ungroup() %>% 
+  mutate(plc_new = 100 - (100 * kstem_length / mean_kstem_a)) %>%   #calculate PLC from 
+  drop_na(plc_new)
+
+
+
+```
+
+
+```{r}
+#Have to do each tree individually and remove the ones that do not work: 
+
+stemID <- subset(vc_all_2025_2, vc_all_2025_2$tree =="484")
+# Convert all numeric columns to avoid scientific notation
+#stemID <- stemID %>%
+  #mutate(k = format(k, scientific = FALSE))
+#pfit <- fitplc(stemID, varnames=c(PLC="plc_new", WP="mpa"), nboot=50)
+
+stemID <- stemID %>%
+  mutate(k = format(k, scientific = FALSE),  # Ensure 'k' is formatted as non-scientific
+         valid_data = ifelse(plc_new >= 0, TRUE, FALSE))  # Create valid_data based on plc_new >= 0
+
+# Fit the model using only rows where plc_new >= 0
+pfit <- fitplc(stemID %>% filter(valid_data == TRUE), varnames = c(PLC = "plc_new", WP = "mpa"), nboot = 50)
+
+# Plot the fitted model
+plot(pfit, 
+     xlim = c(0,7),
+     ylim = c(0,1))
+
+# Access the fitted coefficients
+coefficients <- coef(pfit)
+print(coefficients)
+
+```
 

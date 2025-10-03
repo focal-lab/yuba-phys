@@ -3,14 +3,17 @@ trait_data <- read.csv("/Users/anjumgujral/Box Sync/yuba-phys_data/traits/yuba-p
 
 library('dplyr')
 library('tidyverse')
+library('ggplot2')
 
-## subset dataframe to include only seedlings and saplings for ABCO, PIPO, PILA, and ABMA
+# subset dataframe to include only seedlings and saplings for ABCO, PIPO, PILA, and ABMA
 trait_data1 <- trait_data[trait_data$size_class %in% c('seedling', 'sapling'), ]
 trait_data1 <- trait_data1[trait_data1$species %in% c('ABCO', 'ABMA','PIPO', 'PILA'), ]
-  
-## summary statistics of dataframe
 
-## make a new column turning canopy closure into a categorical variable
+# make size categorical
+trait_data1 <- trait_data1 %>%
+  mutate(size = ifelse(diameter_complete < 2.5, "seedling", "sapling"))
+
+# make a new column turning canopy closure into a categorical variable
 trait_data1$microsite <- cut(
   trait_data1$percent_cover,
   breaks = c(0, 68, 85, 100),
@@ -18,36 +21,7 @@ trait_data1$microsite <- cut(
   right = TRUE
 )
 
-counts_table <- trait_data1 %>%
-  filter(
-    species %in% c('ABCO', 'ABMA', 'PIPO', 'PILA'),
-    size_class %in% c('seedling', 'sapling')
-  ) %>%
-  select(species, size_class, plot) %>%
-  table()
-
-
-## make a table for counts of seedlings and saplings per species by elevation and microsite
-summary_table <- trait_data1 %>%
-  filter(size_class %in% c('seedling', 'sapling'), 
-         species %in% c('ABCO','ABMA','PIPO','PILA')) %>%
-  group_by(species, size_class, elevation, microsite) %>%
-  summarize(count = n(), .groups = 'drop')
-
-## counts by elevation
-low_elev_counts <- summary_table %>%
-  filter(elevation %in% c('low'))
-
-high_elev_counts <- summary_table %>%
-  filter(elevation %in% c('high'))
-
-# counts for midday measurements 
-midday_summary_table <- trait_data1 %>%
-  filter(!is.na(midday_MPa)) %>%  # Only include rows where midday_MPa has data
-  group_by(elevation, microsite, size_class, species) %>%
-  summarise(count = n())
-
-## create a table to summarize missing data
+# create a table to summarize missing data
 missing_heights_by_species <- trait_data1 %>%
   group_by(species, elevation) %>%
   summarize(
@@ -55,63 +29,8 @@ missing_heights_by_species <- trait_data1 %>%
     .groups = 'drop'
   )
 
-
-# counts by height intervals 
-library(dplyr)
-
-# Create height intervals and count heights by species and elevation
-height_intervals <- trait_data1 %>%
-  mutate(height_interval = cut(
-    seedling_height_cm,
-    breaks = seq(0, 200, by = 20),
-    include.lowest = TRUE,
-    right = FALSE,
-    labels = paste0(seq(0, 180, by = 20), "-", seq(20, 200, by = 20))
-  )) %>%
-  group_by(species, elevation, height_interval) %>%
-  summarize(
-    count_heights = n(),  # Count all rows in each interval
-    .groups = 'drop'
-  )
-
-hist(trait_data1$seedling_height_cm)
-
-
-# create DBH intervals and count DBH by species and elevation
-DBH_intervals <- trait_data1 %>%
-  mutate(DBH_interval = cut(
-    diameter_cm,
-    breaks = seq(0, 14, by = 2),
-    include.lowest = TRUE,
-    right = FALSE,
-    labels = paste0(seq(0, 12, by = 2), "-", seq(2, 14, by = 2))
-  )) %>%
-  group_by(species, elevation, DBH_interval) %>%
-  summarize(
-    count_DBH = n(),  # Count all rows in each interval
-    .groups = 'drop'
-  )
-
+# determine the relationship between diameter and height to infill missing data
 trait_data1$diameter <- as.numeric(as.character(trait_data1$diameter_cm))
-
-hist(trait_data1$diameter)
-
-# make a table to visualize the representation of vulnerability curves across species, 
-#size class, elevation and microsite
-
-P50_microsite_table <- trait_data1 %>%
-  filter(branch_processed == 'yes') %>%
-  group_by(species, elevation, microsite, size_class) %>%
-  summarize(count = n(), .groups = 'drop')
-
-## P50 representation is low for AMBA high elev sun seedling, PIPO high and low elev shade seedling, 
-# PILA low elev sun sapling
-
-P50_elev_table <- trait_data1 %>%
-  filter(branch_processed == 'yes') %>%
-  group_by(species, elevation, size_class) %>%
-  summarize(count = n(), .groups = 'drop')
-
 plot(trait_data1$diameter~trait_data1$seedling_height_cm)
 mod1 <- lm(trait_data1$diameter~trait_data1$seedling_height_cm)
 summary(mod1)
@@ -131,12 +50,11 @@ if (nrow(missing_cases) > 0) {
   trait_data1$predicted_diameter[is.na(trait_data1$diameter)] <- predicted_values
 }
 
-# create a new column that combines observed and predicted DBH values
+# create a new column that combines observed and predicted diameter values
 trait_data1$diameter_complete <- ifelse(is.na(trait_data1$diameter), trait_data1$predicted_diameter, 
                                         trait_data1$diameter)
 
-library('ggplot2')
-#compare trends between DBH and seedling height for actual and predicted data
+#compare trends between diameter and seedling height for actual and predicted data
 ggplot(trait_data1, aes(x = seedling_height_cm, y = diameter)) +
   geom_point(color = "blue") +
   geom_point(aes(y = predicted_diameter), color = "red") +
@@ -147,102 +65,135 @@ ggplot(trait_data1, aes(x = seedling_height_cm, y = diameter)) +
     panel.grid.major = element_blank(),
     panel.grid.minor = element_blank())
 
-# are predicted and observed DBH values statistically different?
-t_test <- t.test(
-  trait_data1$DBH[!is.na(trait_data1$diameter) & !is.na(trait_data1$predicted_diameter)],
-  trait_data1$predicted_diameter[!is.na(trait_data1$diameter) & !is.na(trait_data1$predicted_diameter)],
-  paired = TRUE
-)
-print(t_test)
+# make sure P50 is numeric
+trait_data1$P50_MPa_2024 <- as.numeric(as.character(trait_data1$P50_MPa_2024))
+trait_data1$P50_MPa_2025 <- as.numeric(as.character(trait_data1$P50_MPa_2025))
 
-# preliminary analyses
-write.csv(trait_data1, "trait_data1.csv", row.names = FALSE)
+# make a new dataframe that pools together 2024 and 2025 data into single trait variables
+trait_data2 <- trait_data1 %>%
+  pivot_longer(
+    cols = c(P50_MPa_2024, P50_MPa_2025,
+             HSM_predawn_2024, HSM_midday_2024,
+             HSM_predawn_2025, HSM_midday_2025,
+             predawn_MPa_2024, predawn_MPa_2025,
+             midday_MPa_2024, midday_MPa_2025),
+    names_to = c(".value", "year"),
+    names_sep = "_(?=20)"  
+  )
 
-
-trait_data1$P50_MPa <- as.numeric(as.character(trait_data1$P50_MPa))
-
-# interpolate P50 values for individuals that P50 wasnt measure
+# interpolate P50 values for individuals that P50 wasn't measured
 # create a training dataset
-P50_measured <- trait_data1 %>%
+P50_measured <- trait_data2 %>%
   filter(!is.na(P50_MPa))
 
-P50_missing <- trait_data1 %>% filter(is.na(P50_MPa))
+P50_missing <- trait_data2 %>% filter(is.na(P50_MPa))
 
-mod3 <- lm(P50_MPa ~ species + size + percent_cover + elev_indiv, data = P50_measured)
+mod3 <- lm(P50_MPa ~ species + size + percent_cover + elev_indiv + year, data = P50_measured)
 summary(mod3)
 
-trait_data1$predicted_P50 <- NA
+trait_data2$predicted_P50 <- NA
 
 if (nrow(P50_missing) > 0) {
   P50_predicted_values <- predict(mod3, newdata = P50_missing)
-  trait_data1$predicted_P50[is.na(trait_data1$P50_MPa)] <- P50_predicted_values
+  trait_data2$predicted_P50[is.na(trait_data2$P50_MPa)] <- P50_predicted_values
 }
 
-# create a new column that combines observed and predicted DBH values
-trait_data1$P50_complete <- ifelse(is.na(trait_data1$P50_MPa), trait_data1$predicted_P50, 
-                                        trait_data1$P50_MPa)
+# create a new column that combines observed and predicted P50 values
+trait_data2$P50_complete <- ifelse(is.na(trait_data2$P50_MPa), trait_data2$predicted_P50, 
+                                        trait_data2$P50_MPa)
 
 #compare trends between P50 measured and P50 predicted
-# Base plot
-
-# Plot both measured and predicted P50 values over size (or diameter)
 ggplot() +
-  # Measured P50 points
   geom_point(
-    data = trait_data1 %>% filter(!is.na(P50_MPa)),
-    aes(x = diameter_complete, y = P50_MPa, color = "Measured P50"),
-    alpha = 0.7
+    data = trait_data2 %>% filter(!is.na(P50_MPa)),
+    aes(x = diameter_complete, y = P50_MPa, color = species),
+    shape = 16, size = 3, alpha = 0.8
   ) +
-  # Predicted P50 points (generated on the fly)
   geom_point(
-    data = trait_data1 %>% filter(is.na(P50_MPa)),
-    aes(x = diameter_complete, y = predict(mod3, newdata = trait_data1 %>% filter(is.na(P50_MPa))), color = "Predicted P50"),
-    alpha = 0.7
+    data = trait_data2 %>% filter(is.na(P50_MPa)),
+    aes(x = diameter_complete, y = predicted_P50, color = species),
+    shape = 17, size = 3, alpha = 0.8
+  ) +
+  geom_smooth(
+    data = trait_data2 %>% filter(!is.na(P50_MPa)),
+    aes(x = diameter_complete, y = P50_MPa, color = species, linetype = "Measured"),
+    method = "lm", se = TRUE, size = 1, alpha = 0.3
+  ) +
+  geom_smooth(
+    data = trait_data2 %>% filter(is.na(P50_MPa)),
+    aes(x = diameter_complete, y = predicted_P50, color = species, linetype = "Predicted"),
+    method = "lm", se = TRUE, size = 1, alpha = 0.3
   ) +
   scale_color_manual(
-    name = NULL,
-    values = c("Measured P50" = "steelblue", "Predicted P50" = "darkorange")
+    values = c(
+      "ABCO" = "mediumturquoise",
+      "PIPO" = "lawngreen",
+      "ABMA" = "maroon3",
+      "PILA" = "lightslateblue"
+    )
+  ) +
+  scale_linetype_manual(
+    name = "P50 Type",
+    values = c("Measured" = "solid", "Predicted" = "dashed")
   ) +
   labs(
-    title = "Measured and Predicted P50 Values vs. Size",
-    x = "Size (e.g., Diameter)",
-    y = "P50 (MPa)"
+    title = "Measured and Predicted P50 Trendlines by Species",
+    x = "Diameter at Root Collar (cm)",
+    y = "P50 (-MPa)",
+    color = "Species"
   ) +
-  theme_minimal()
-
-
-trait_data1$HSM_predawn_2024 <- trait_data1$P50_MPa - trait_data1$predawn_MPa_2024
-trait_data1$HSM_midday_2024  <- trait_data1$P50_MPa - trait_data1$midday_MPa_2024
-
-trait_data1$HSM_predawn_2025 <- trait_data1$P50_MPa - trait_data1$predawn_MPa_2025
-trait_data1$HSM_midday_2025 <- trait_data1$P50_MPa - trait_data1$midday_MPa_2025
-
-trait_data1 <- trait_data1 %>%
-  mutate(size = ifelse(diameter_complete < 2.5, "seedling", "sapling"))
-
-trait_data1 <- trait_data1[, !(names(trait_data1) %in% "HSM_MPa")]
-
-## see PLC script to make sure P50 means are loaded 
-
-trait_data1$HSM_predawn_P50_mean_2024 <- trait_data1$P50_mean - trait_data1$predawn_MPa_2024
-trait_data1$HSM_midday_P50_mean_2024  <- trait_data1$P50_mean - trait_data1$midday_MPa_2024
-
-trait_data1$HSM_predawn_P50_mean_2025 <- trait_data1$P50_mean - trait_data1$predawn_MPa_2025
-trait_data1$HSM_midday_P50_mean_2025  <- trait_data1$P50_mean - trait_data1$midday_MPa_2025
-
-ABCO <- trait_data1[trait_data1$species == 'ABCO',]
-PILA <- trait_data1[trait_data1$species == 'PILA',]
-PIPO <- trait_data1[trait_data1$species == 'PIPO',]
-ABMA <- trait_data1[trait_data1$species == 'ABMA',]
-
-
-trait_data2 <- trait_data1 %>%
-  pivot_longer(
-    cols = c(predawn_MPa_2025, midday_MPa_2025, P50_MPa, P50_mean, P50_complete, HSM_predawn_2025, HSM_midday_2025),
-    names_to = "type",
-    values_to = "water_potential"
+  theme_minimal(base_size = 14) +
+  theme(
+    legend.position = "right",
+    panel.grid.minor = element_blank(),
+    panel.grid.major = element_line(color = "gray90")
   )
 
+# with the exception of ABMA it looks like predicted and observed P50 values are similar enough
 
+# calculate HSM using both predawn and midday with year specific WP and P50 data
+trait_data1$HSM_predawn_2024 <- trait_data1$P50_MPa_2024 - trait_data1$predawn_MPa_2024
+trait_data1$HSM_midday_2024  <- trait_data1$P50_MPa_2024 - trait_data1$midday_MPa_2024
 
+trait_data1$HSM_predawn_2025 <- trait_data1$P50_MPa_2025 - trait_data1$predawn_MPa_2025
+trait_data1$HSM_midday_2025 <- trait_data1$P50_MPa_2025 - trait_data1$midday_MPa_2025
 
+# calculate HSM using P50_complete (measured and predicted P50 infilled for missing values)
+trait_data2$HSM_predawn_P50_mean_2024 <- trait_data2$P50_complete - trait_data2$predawn_MPa_2024
+trait_data2$HSM_midday_P50_mean_2024  <- trait_data2$P50_complete - trait_data2$midday_MPa_2024
+
+trait_data2$HSM_predawn_P50_mean_2025 <- trait_data2$P50_complete - trait_data2$predawn_MPa_2025
+trait_data2$HSM_midday_P50_mean_2025  <- trait_data2$P50_complete - trait_data2$midday_MPa_2025
+
+# subset dataframe by species 
+ABCO <- trait_data2[trait_data2$species == 'ABCO',]
+PILA <- trait_data2[trait_data2$species == 'PILA',]
+PIPO <- trait_data2[trait_data2$species == 'PIPO',]
+ABMA <- trait_data2[trait_data2$species == 'ABMA',]
+
+# remove outlier tree_ID == 94
+trait_data1 <- trait_data1[trait_data1$tree_ID != 94, ]
+trait_data2 <- trait_data2[trait_data2$tree_ID != 94, ]
+
+mod3 <- lmer(predawn_MPa ~ diameter + percent_cover + year + elev_indiv + species 
+             + (1|plot), data = trait_data2)
+summary(mod3)
+
+# determine whether WP and P50 values are different between years to determine how data is pooled
+t.test(predawn_MPa ~ year, data = trait_data2, paired = FALSE)
+# There is a statistically significant difference between 2024 and 2025 
+# predawn and midday water potential means. 
+
+# create a new variable that is predawn and midday for 2025 unless NA, if NA, pull 2024 
+trait_data1 <- trait_data1 %>%
+  mutate(predawn_MPa_combined = coalesce(predawn_MPa_2025, predawn_MPa_2024))
+
+trait_data1 <- trait_data1 %>%
+  mutate(midday_MPa_combined = coalesce(midday_MPa_2025, midday_MPa_2024))
+
+# add P50_complete to trait_data1, its derived from both P50_MPa_2024 and P50_MPa_2025 
+# in trait_data2
+# and now we can recalculate HSM using P50 complete (observed and predicted values) and 2024-2025 
+# combined WP data
+trait_data1$HSM_predawn_P50_mean <- trait_data2$P50_complete - trait_data1$predawn_MPa_combined
+trait_data1$HSM_midday_P50_mean  <- trait_data2$P50_complete - trait_data1$midday_MPa_combined
