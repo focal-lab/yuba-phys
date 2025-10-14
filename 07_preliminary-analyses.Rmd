@@ -214,6 +214,7 @@ s1 <- ggplot(trait_data1, aes(y = predawn_MPa_combined, x = diameter_complete, c
     y = "Predawn water potential (-MPa)",
     color = "Species"
   ) +
+    theme_bw() +
   scale_color_manual(values = c(
     "ABCO" = "mediumturquoise",
     "PIPO" = "lawngreen",
@@ -221,12 +222,9 @@ s1 <- ggplot(trait_data1, aes(y = predawn_MPa_combined, x = diameter_complete, c
     "PILA" = "lightslateblue"
   )) +
   theme(
-    panel.background = element_blank(),
     panel.grid.major = element_blank(),
     panel.grid.minor = element_blank(),
-    panel.border = element_blank(),
-    axis.line = element_line(color = "black"),
-  legend.position = "none"
+    legend.position = "none"
   )
 
 s1
@@ -234,43 +232,38 @@ s1
 s2 <- ggplot(trait_data1, aes(x = diameter_complete, y = midday_MPa_combined, color = species)) +
   geom_point(size = 3, alpha = 1) +  
   geom_smooth(method = "lm", se = TRUE, alpha = 0.3) +  
+  labs(
+    x = "Diameter at root collar (cm)", y = "Midday water potential (-MPa)", color = "Species") +
+    theme_bw() +
   scale_color_manual(values = c(
     "ABCO" = "mediumturquoise",
     "PIPO" = "lawngreen",
     "ABMA" = "maroon3",
     "PILA" = "lightslateblue"
   )) +
-  labs(x = "Diameter at root collar (cm)", y = "Midday water potential (-MPa)") +
   theme(
-    panel.background = element_blank(),
     panel.grid.major = element_blank(),
     panel.grid.minor = element_blank(),
-    panel.border = element_blank(),
-    axis.line = element_line(color = "black"),
-  legend.position = "none"
+    legend.position = "none"
   )
-
-s2 
+s2
 
 s3 <- ggplot(trait_data1, aes(x = diameter_complete, y = P50_combined, color = species)) +
   geom_point(size = 3, alpha = 1) +  
   geom_smooth(method = "lm", se = TRUE, alpha = 0.3) +  
+  labs(x = "Diameter at root collar (cm)", y = "P50 (-MPa)", color ="Species") +
+    theme_bw() +
   scale_color_manual(values = c(
     "ABCO" = "mediumturquoise",
     "PIPO" = "lawngreen",
     "ABMA" = "maroon3",
     "PILA" = "lightslateblue"
   )) +
-  labs(x = "Diameter at root collar (cm)", y = "P50 (-MPa)") +
   theme(
-    panel.background = element_blank(),
     panel.grid.major = element_blank(),
     panel.grid.minor = element_blank(),
-    panel.border = element_blank(),
-    axis.line = element_line(color = "black"),
     legend.position = "none"
   )
-
 s3
 
 s6 <- ggplot() +
@@ -343,18 +336,23 @@ s5 <- ggplot(trait_data2, aes(x = diameter_complete, y = HSM_midday_P50_mean, co
     "ABMA" = "maroon3",
     "PILA" = "lightslateblue"
   )) +
-  labs(x = "Diameter at root collar (cm)", y = "HSM midday (MPa)") +
+  labs(
+    x = "Diameter at root collar (cm)", y = "HSM midday (MPa)", color = "Species") +
+    theme_bw() +
+  scale_color_manual(values = c(
+    "ABCO" = "mediumturquoise",
+    "PIPO" = "lawngreen",
+    "ABMA" = "maroon3",
+    "PILA" = "lightslateblue"
+  )) +
   theme(
-    panel.background = element_blank(),
     panel.grid.major = element_blank(),
     panel.grid.minor = element_blank(),
-    panel.border = element_blank(),
-    axis.line = element_line(color = "black"),
     legend.position = "none"
   )
 
 s5
-grid.arrange(s1, s2, s4, s5, s3, nrow = 3, ncol = 2)
+grid.arrange(s1, s2, s3, s5, nrow = 2, ncol = 2)
 
 
 ```
@@ -386,7 +384,7 @@ r1 <- ggplot(trait_data1, aes(y = HSM_midday_P50_mean, x = predawn_MPa_combined,
 r1
 
 
-r2 <- ggplot(trait_data1, aes(y = P50_mean, x = predawn_MPa_combined, color = species)) +
+r2 <- ggplot(trait_data1, aes(y = P50_combined, x = predawn_MPa_combined, color = species)) +
   geom_point(size = 3, alpha = 1) +
   geom_smooth(method = "lm", se = TRUE, alpha = 0.2, linewidth = 1) +  
   labs(
@@ -403,7 +401,8 @@ r2 <- ggplot(trait_data1, aes(y = P50_mean, x = predawn_MPa_combined, color = sp
   )) +
   theme(
     panel.grid.major = element_blank(),
-    panel.grid.minor = element_blank()
+    panel.grid.minor = element_blank(),
+    legend.position = "none"
   )
 
 r2
@@ -476,7 +475,8 @@ m1 <- ggplot(trait_data1, aes(x = percent_cover, y = P50_combined, color = speci
   #scale_y_reverse() + 
   theme(
     panel.grid.major = element_blank(),
-    panel.grid.minor = element_blank()
+    panel.grid.minor = element_blank(),
+    legend.position = "none"
   )
 
 m1
@@ -510,7 +510,7 @@ e1 <- ggplot(subset(trait_data1, species != "ABMA"), aes(x = elev_indiv, y = HSM
   geom_smooth(method = "lm", se = TRUE,  alpha = 0.25) +
   labs(
     x = "Elevation (ft)", 
-    y = "HSM midday", 
+    y = "HSM Midday (MPa)", 
     color = "Species"
   ) +
   theme_bw() +
@@ -537,7 +537,7 @@ e2 <- ggplot(subset(trait_data1, species != "ABMA"), aes(x = elev_indiv, y = P50
   geom_smooth(method = "lm", se = TRUE,  alpha = 0.25) +
   labs(
     x = "Elevation (ft)", 
-    y = "P50 (MPa)", 
+    y = "P50 (-MPa)", 
     color = "Species"
   ) +
   theme_bw() +
@@ -553,7 +553,8 @@ e2 <- ggplot(subset(trait_data1, species != "ABMA"), aes(x = elev_indiv, y = P50
   #scale_y_reverse() + 
   theme(
     panel.grid.major = element_blank(),
-    panel.grid.minor = element_blank()
+    panel.grid.minor = element_blank(),
+    legend.position = "none"
   )
 
 e2
@@ -702,42 +703,42 @@ grid.arrange(h1,h3,h2, nrow = 1, ncol = 3)
 g1 <- ggplot(trait_data1, aes(x = diameter_complete, y = internode_length_1_2, color = species)) +
   geom_point(size = 3, alpha = 1) +  
   geom_smooth(method = "lm", se = TRUE, alpha = 0.3) +  
+  labs(x = "Diameter at root collar (cm)", y = "Internode length (cm)") +
+  theme_bw() +
   scale_color_manual(values = c(
     "ABCO" = "mediumturquoise",
     "PIPO" = "lawngreen",
     "ABMA" = "maroon3",
     "PILA" = "lightslateblue"
   )) +
-  labs(x = "Diameter at root collar (cm)", y = "Internode length (cm)") +
+  #scale_y_reverse() + 
   theme(
-    panel.background = element_blank(),
     panel.grid.major = element_blank(),
     panel.grid.minor = element_blank(),
-    panel.border = element_blank(),
-    axis.line = element_line(color = "black"),
-  legend.position = "none"
+    legend.position = "none"
   )
+
 
 g1 
 
 g2 <- ggplot(trait_data1, aes(x = predawn_MPa_combined, y = internode_length_1_2, color = species)) +
   geom_point(size = 3, alpha = 1) +  
   geom_smooth(method = "lm", se = TRUE, alpha = 0.3) +  
+  labs(x = "Predawn water potential (-MPa)", y = "Internode length (cm)") +
+  theme_bw() +
   scale_color_manual(values = c(
     "ABCO" = "mediumturquoise",
     "PIPO" = "lawngreen",
     "ABMA" = "maroon3",
     "PILA" = "lightslateblue"
   )) +
-  labs(x = "Predawn water potential (-MPa)", y = "Internode length (cm)") +
+  #scale_y_reverse() + 
   theme(
-    panel.background = element_blank(),
     panel.grid.major = element_blank(),
     panel.grid.minor = element_blank(),
-    panel.border = element_blank(),
-    axis.line = element_line(color = "black"),
     legend.position = "none"
   )
+
 
 g2
 
@@ -750,39 +751,38 @@ g3 <- ggplot(trait_data1, aes(x =HSM_midday_P50_mean , y = internode_length_1_2,
     y = "Internode length (cm) ",
     color = "Species"
   ) +
+  theme_bw() +
   scale_color_manual(values = c(
     "ABCO" = "mediumturquoise",
     "PIPO" = "lawngreen",
     "ABMA" = "maroon3",
     "PILA" = "lightslateblue"
   )) +
+  #scale_y_reverse() + 
   theme(
-    panel.background = element_blank(),
     panel.grid.major = element_blank(),
     panel.grid.minor = element_blank(),
-    panel.border = element_blank(),
-    axis.line = element_line(color = "black"),
-  legend.position = "none"
+    legend.position = "none"
   )
+
 
 g3
 
 g4 <- ggplot(trait_data1, aes(x = P50_mean, y = internode_length_1_2, color = species)) +
   geom_point(size = 3, alpha = 1) +  
   geom_smooth(method = "lm", se = TRUE, alpha = 0.3) +  
+  labs(x = "P50 (-MPa)", y = "Internode length (cm)") +
+  theme_bw() +
   scale_color_manual(values = c(
     "ABCO" = "mediumturquoise",
     "PIPO" = "lawngreen",
     "ABMA" = "maroon3",
     "PILA" = "lightslateblue"
   )) +
-  labs(x = "P50 (-MPa)", y = "Internode length (cm)") +
+  #scale_y_reverse() + 
   theme(
-    panel.background = element_blank(),
     panel.grid.major = element_blank(),
     panel.grid.minor = element_blank(),
-    panel.border = element_blank(),
-    axis.line = element_line(color = "black"),
     legend.position = "none"
   )
 
@@ -791,19 +791,18 @@ g4
 g5 <- ggplot(trait_data1, aes(x = percent_cover, y = internode_length_1_2, color = species)) +
   geom_point(size = 3, alpha = 1) +  
   geom_smooth(method = "lm", se = TRUE, alpha = 0.3) +  
+  labs(x = "Canopy closure (%)", y = "Internode length (cm)") +
+  theme_bw() +
   scale_color_manual(values = c(
     "ABCO" = "mediumturquoise",
     "PIPO" = "lawngreen",
     "ABMA" = "maroon3",
     "PILA" = "lightslateblue"
   )) +
-  labs(x = "Canopy closure (%)", y = "Internode length (cm)") +
+  #scale_y_reverse() + 
   theme(
-    panel.background = element_blank(),
     panel.grid.major = element_blank(),
     panel.grid.minor = element_blank(),
-    panel.border = element_blank(),
-    axis.line = element_line(color = "black"),
     legend.position = "none"
   )
 
@@ -812,21 +811,21 @@ g5
 g6 <- ggplot(trait_data1, aes(x = elev_indiv, y = internode_length_1_2, color = species)) +
   geom_point(size = 3, alpha = 1) +  
   geom_smooth(method = "lm", se = TRUE, alpha = 0.3) +  
+  labs(x = "Elevation (ft)", y = "Internode length (cm)") +
+  theme_bw() +
   scale_color_manual(values = c(
     "ABCO" = "mediumturquoise",
     "PIPO" = "lawngreen",
     "ABMA" = "maroon3",
     "PILA" = "lightslateblue"
   )) +
-  labs(x = "Elevation (ft)", y = "Internode length (cm)") +
+  #scale_y_reverse() + 
   theme(
-    panel.background = element_blank(),
     panel.grid.major = element_blank(),
     panel.grid.minor = element_blank(),
-    panel.border = element_blank(),
-    axis.line = element_line(color = "black"),
     legend.position = "none"
   )
+
 
 g6
 grid.arrange(g1, g2, g3, g4, g5,g6, nrow = 3, ncol = 2)
@@ -954,12 +953,11 @@ ggplot() +
 # stats - Table 1, 2, 3
 ```{r}
 
-mod <- lmer(internode_length_1_2 ~ HSM_predawn_P50_mean_scaled + (1 | plot), data = ABMA)
+mod <- lmer(P50_combined ~ diameter_complete + percent_cover + elev_indiv + (1 | plot), data = PIPO)
 summary(mod)
 
 
-
-mod1 <- lmer(predawn_MPa ~ diameter + percent_cover + year + elev_indiv + species + (1|plot), data = trait_data2)
+mod1 <- lm(HSM_predawn_combined ~ diameter, data = ABCO)
 summary(mod1)
 
 t.test(midday_MPa ~ year, data = trait_data2, paired = FALSE)
