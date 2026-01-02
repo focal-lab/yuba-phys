@@ -426,8 +426,7 @@ Fig1A <- ggplot() +
   data = all_preds,
   aes(x = diameter_cm, y = pred,
       color = species,
-      linetype = signif,
-      alpha = signif),
+      linetype = signif),
   size = 1.2,
   na.rm = TRUE
 )+
@@ -446,8 +445,8 @@ scale_alpha_manual(values = c(
   labels = function(x) paste0("\u2212", x)
 ) +
   labs(
-    x = "Diameter at root collar (cm)",
-    y = "Predawn Water Potential (MPa)"
+    x = "Basal diameter (cm)",
+    y = "Predawn water potential (MPa)"
   ) +
   theme(
     panel.background = element_rect(fill = "white", color = NA),
@@ -529,8 +528,7 @@ Fig1B <- ggplot() +
   data = all_preds,
   aes(x = diameter_cm, y = pred,
       color = species,
-      linetype = signif,
-      alpha = signif),
+      linetype = signif),
   size = 1.2,
   na.rm = TRUE
 ) +
@@ -548,8 +546,8 @@ scale_linetype_manual(values = c(
   scale_y_reverse(
   labels = function(x) paste0("\u2212", x)
 ) + 
-  labs(x = "Diameter at root collar (cm)",
-       y = "Midday Water Potential (MPa)")  +
+  labs(x = "Basal diameter (cm)",
+       y = "Midday water potential (MPa)")  +
   theme(
     panel.background = element_rect(fill = "white", color = NA),
     panel.border = element_rect(color = "gray50", fill = NA, size = 1),  # ← this creates the box
@@ -806,15 +804,14 @@ for (sp in names(species_list)) {
 Fig2A <- ggplot() +
   geom_point(data = trait_data1,
              aes(x = diameter_complete, y = P50_combined, color = species),
-             alpha = 00.35, size = 2.5, na.rm = TRUE) +
+             alpha = 0.35, size = 2.5, na.rm = TRUE) +
   scale_color_manual(values = species_colors) +
   new_scale_color() +
   geom_line(
   data = all_preds_P50,
   aes(x = diameter_cm, y = pred,
       color = species,
-      linetype = signif,
-      alpha = signif),
+      linetype = signif),
   size = 1.2,
   na.rm = TRUE
 )+
@@ -832,7 +829,7 @@ scale_alpha_manual(values = c(
   scale_y_reverse(
   labels = function(x) paste0("\u2212", x)
 ) +
-  labs(x = "Diameter at root collar (cm)",
+  labs(x = "Basal diameter (cm)",
        y = expression(P[50]~"(MPa)"))+ 
   theme(
     panel.background = element_rect(fill = "white", color = NA),
@@ -840,7 +837,7 @@ scale_alpha_manual(values = c(
     panel.grid = element_blank(),       
     axis.line = element_blank(),         
     plot.background = element_rect(fill = "white", color = NA),
-    legend.position = "none"
+    legend.position = "bottom"
   )
 Fig2A
 
@@ -911,9 +908,9 @@ for (sp in names(species_list)) {
 Fig2B <- ggplot() +
   geom_point(data = trait_data1,
              aes(x = predawn_MPa_combined, y = P50_combined, color = species),
-             alpha = 00.35, size = 2.5, na.rm = TRUE) +
+             alpha = 0.35, size = 2.5, na.rm = TRUE) +
   geom_line(data = all_preds,
-            aes(x = predawn, y = pred, color = species, linetype = signif, alpha = signif),
+            aes(x = predawn, y = pred, color = species, linetype = signif),
             size = 1.2, na.rm = TRUE) +
   scale_color_manual(values = species_colors) +
   new_scale_color() +
@@ -930,8 +927,11 @@ scale_alpha_manual(values = c(
 )) +
   scale_y_reverse(
   labels = function(x) paste0("\u2212", x)
-) +
-  labs(x = "Predawn Water Potential (-MPa)",
+  ) +
+  scale_x_reverse(
+    labels = function(x) paste0("\u2212", abs(x))
+  ) +
+  labs(x = "Predawn water potential (MPa)",
        y = expression(P[50]~"(MPa)"))   +
   theme(
     panel.background = element_rect(fill = "white", color = NA),
@@ -1011,9 +1011,9 @@ for (sp in names(species_list)) {
 Fig2C <- ggplot() +
   geom_point(data = trait_data1,
              aes(x = percent_cover, y = P50_combined, color = species),
-             alpha = 00.35, size = 2.5, na.rm = TRUE) +
+             alpha = 0.35, size = 2.5, na.rm = TRUE) +
   geom_line(data = all_preds,
-            aes(x = percent_cover, y = pred, color = species, linetype = signif, alpha = signif),
+            aes(x = percent_cover, y = pred, color = species, linetype = signif),
             size = 1.2, na.rm = TRUE) +
   scale_color_manual(values = species_colors) +
   new_scale_color() +
@@ -1095,9 +1095,9 @@ for (sp in names(species_list_elev)) {
 Fig2D <- ggplot() +
   geom_point(data = trait_data1 %>% filter(species %in% names(species_list_elev)),
              aes(x = elev_indiv, y = P50_combined, color = species),
-             alpha = 00.35, size = 2.5, na.rm = TRUE) +
+             alpha = 0.35, size = 2.5, na.rm = TRUE) +
   geom_line(data = all_preds_elev_P50,
-            aes(x = elevation, y = pred, color = species, linetype = signif, alpha = signif),
+            aes(x = elevation, y = pred, color = species, linetype = signif),
             size = 1.2, na.rm = TRUE) +
   scale_color_manual(values = species_colors) +  
   scale_linetype_manual(values = c(
@@ -1184,10 +1184,9 @@ for (sp in names(species_list)) {
 Fig3A <- ggplot() +
   geom_point(data = trait_data1,
              aes(x = diameter_complete, y = HSM_predawn_P50_mean, color = species),
-             alpha = 0.35, size = 2.5, na.rm = TRUE) +
+             alpha = 0.35, size = 2, na.rm = TRUE) +
   geom_line(data = all_preds,
-            aes(x = diameter_cm, y = pred, color = species, linetype = signif,
-      alpha = signif),
+            aes(x = diameter_cm, y = pred, color = species, linetype = signif),
             size = 1.2, na.rm = TRUE) +
   scale_color_manual(values = species_colors) +
   scale_linetype_manual(values = c(
@@ -1200,7 +1199,7 @@ Fig3A <- ggplot() +
     "Marginal"        = 0.7,
     "Not significant" = 0.35
   )) +
-  labs(x = "Diameter at root collar (cm)",
+  labs(x = "Basal diameter (cm)",
        y = expression(HSM[predawn]~"(MPa)")) + 
   theme(
     panel.background = element_rect(fill = "white", color = NA),
@@ -1210,7 +1209,7 @@ Fig3A <- ggplot() +
     plot.background = element_rect(fill = "white", color = NA),
     legend.position = "none"
   )
-
+Fig3A
 ### FIGURE 3B: HSM_midday_P50_mean
 all_preds <- data.frame()
 model_summaries <- data.frame()
@@ -1268,10 +1267,9 @@ for (sp in names(species_list)) {
 Fig3B <- ggplot() +
   geom_point(data = trait_data1,
              aes(x = diameter_complete, y = HSM_midday_P50_mean, color = species),
-             alpha = 0.35, size = 2.5, na.rm = TRUE) +
+             alpha = 0.35, size = 2, na.rm = TRUE) +
   geom_line(data = all_preds,
-            aes(x = diameter_cm, y = pred, color = species, linetype = signif,
-      alpha = signif),
+            aes(x = diameter_cm, y = pred, color = species, linetype = signif),
             size = 1.2, na.rm = TRUE) +
   scale_color_manual(values = species_colors) +
    scale_linetype_manual(values = c(
@@ -1284,7 +1282,7 @@ Fig3B <- ggplot() +
     "Marginal"        = 0.7,
     "Not significant" = 0.35
   )) +
-  labs(x = "Diameter at root collar (cm)",
+  labs(x = "Basal diameter (cm)",
        y = expression(HSM[midday]~"(MPa)")) + 
   theme(
     panel.background = element_rect(fill = "white", color = NA),
@@ -1372,10 +1370,9 @@ for (sp in names(species_list)) {
 Fig3C <- ggplot() +
   geom_point(data = trait_data1,
              aes(x = percent_cover, y = HSM_predawn_P50_mean, color = species),
-             alpha = 0.35, size = 2.5, na.rm = TRUE) +
+             alpha = 0.35, size = 2, na.rm = TRUE) +
   geom_line(data = all_preds,
-            aes(x = percent_cover, y = pred, color = species, linetype = signif,
-      alpha = signif),
+            aes(x = percent_cover, y = pred, color = species, linetype = signif),
             size = 1.2, na.rm = TRUE) +
   scale_color_manual(values = species_colors) +
     scale_linetype_manual(values = c(
@@ -1467,10 +1464,9 @@ for (sp in names(species_list)) {
 Fig3D <- ggplot() +
   geom_point(data = trait_data1,
              aes(x = percent_cover, y = HSM_midday_P50_mean, color = species),
-             alpha = 0.35, size = 2.5, na.rm = TRUE) +
+             alpha = 0.35, size = 2, na.rm = TRUE) +
   geom_line(data = all_preds,
-            aes(x = percent_cover, y = pred, color = species, linetype = signif,
-      alpha = signif),
+            aes(x = percent_cover, y = pred, color = species, linetype = signif),
             size = 1.2, na.rm = TRUE) +
   scale_color_manual(values = species_colors) +
    scale_linetype_manual(values = c(
@@ -1548,10 +1544,9 @@ for (sp in names(species_list_elev)) {
 Fig3E <- ggplot() +
   geom_point(data = trait_data1 %>% dplyr::filter(species %in% names(species_list_elev)),
              aes(x = elev_indiv, y = HSM_predawn_P50_mean, color = species),
-             alpha = 0.35, size = 2.5, na.rm = TRUE) +
+             alpha = 0.35, size = 2, na.rm = TRUE) +
   geom_line(data = all_preds_elev_HSM,
-            aes(x = elevation, y = pred, color = species, linetype = signif,
-      alpha = signif),
+            aes(x = elevation, y = pred, color = species, linetype = signif),
             size = 1.2, na.rm = TRUE) +
   scale_color_manual(values = species_colors) +
   scale_linetype_manual(values = c(
@@ -1629,10 +1624,9 @@ for (sp in names(species_list_elev)) {
 Fig3F <- ggplot() +
   geom_point(data = trait_data1 %>% dplyr::filter(species %in% names(species_list_elev)),
              aes(x = elev_indiv, y = HSM_midday_P50_mean, color = species),
-             alpha = 0.35, size = 2.5, na.rm = TRUE) +
+             alpha = 0.35, size = 2, na.rm = TRUE) +
   geom_line(data = all_preds_elev_HSM,
-            aes(x = elevation, y = pred, color = species, linetype = signif,
-      alpha = signif),
+            aes(x = elevation, y = pred, color = species, linetype = signif),
             size = 1.2, na.rm = TRUE) +
   scale_color_manual(values = species_colors) +
   scale_linetype_manual(values = c(
@@ -1718,10 +1712,9 @@ for (sp in names(species_list)) {
 Fig3G <- ggplot() +
   geom_point(data = trait_data1,
              aes(x = predawn_MPa_combined, y = HSM_midday_P50_mean, color = species),
-             alpha = 0.35, size = 2.5, na.rm = TRUE) +
+             alpha = 0.35, size = 2, na.rm = TRUE) +
   geom_line(data = all_preds,
-            aes(x = predawn, y = pred, color = species, linetype = signif,
-      alpha = signif),
+            aes(x = predawn, y = pred, color = species, linetype = signif),
             size = 1.2, na.rm = TRUE) +
   scale_color_manual(values = species_colors) +
   scale_linetype_manual(values = c(
@@ -1737,7 +1730,7 @@ Fig3G <- ggplot() +
   scale_x_reverse(
     labels = function(x) paste0("\u2212", abs(x))
   ) +
-  labs(x = "Predawn Water Potential (MPa)",
+  labs(x = "Predawn water potential (MPa)",
        y = expression(HSM[midday]~"(MPa)")) + 
   theme(
     panel.background = element_rect(fill = "white", color = NA),
@@ -2001,7 +1994,7 @@ Fig4A <- ggplot() +
     "Marginal"        = 0.7,
     "Not significant" = 0.35
   )) +
-  labs(x = "Diameter at root collar (cm)", y = "Internode length (cm)")  +
+  labs(x = "Basal diameter (cm)", y = "Internode length (cm)")  +
   theme(
     panel.background = element_rect(fill = "white", color = NA),
     panel.border = element_rect(color = "gray50", fill = NA, size = 1),
@@ -2072,8 +2065,7 @@ Fig4B <- ggplot() +
              aes(x = predawn_MPa_combined, y = internode_length_1_2, color = species),
              alpha = 0.35, size = 2.5, na.rm = TRUE) +
   geom_line(data = all_preds,
-            aes(x = predawn, y = pred, color = species, linetype = signif,
-      alpha = signif),
+            aes(x = predawn, y = pred, color = species, linetype = signif),
             size = 1.2, na.rm = TRUE) +
   scale_color_manual(values = species_colors) +
   scale_linetype_manual(values = c(
@@ -2089,7 +2081,7 @@ Fig4B <- ggplot() +
   scale_x_reverse(
     labels = function(x) paste0("\u2212", abs(x))
   ) +
-  labs(x = "Predawn Water Potential (MPa)",
+  labs(x = "Predawn water potential (MPa)",
        y = "Internode length (cm)")  +
   theme(
     panel.background = element_rect(fill = "white", color = NA),
@@ -2164,8 +2156,7 @@ Fig4C <- ggplot() +
              aes(x = HSM_midday_P50_mean, y = internode_length_1_2, color = species),
              alpha = 0.35, size = 2.5, na.rm = TRUE) +
   geom_line(data = all_preds,
-            aes(x = HSM_midday_P50_mean, y = pred, color = species, linetype = signif,
-      alpha = signif),
+            aes(x = HSM_midday_P50_mean, y = pred, color = species, linetype = signif),
             size = 1.2, na.rm = TRUE) +
   scale_color_manual(values = species_colors) +
   scale_linetype_manual(values = c(
@@ -2253,8 +2244,7 @@ Fig4D <- ggplot() +
              aes(x = P50_combined, y = internode_length_1_2, color = species),
              alpha = 0.35, size = 2.5, na.rm = TRUE) +
   geom_line(data = all_preds,
-            aes(x = P50_raw, y = pred, color = species, linetype = signif,
-      alpha = signif),
+            aes(x = P50_raw, y = pred, color = species, linetype = signif),
             size = 1.2, na.rm = TRUE) +
   scale_color_manual(values = species_colors) +
   scale_linetype_manual(values = c(
@@ -2348,8 +2338,7 @@ Fig4E <- ggplot() +
              aes(x = percent_cover, y = internode_length_1_2, color = species),
              alpha = 0.25, size = 2.5, na.rm = TRUE) +
   geom_line(data = all_preds,
-            aes(x = canopy, y = pred, color = species, linetype = signif,
-      alpha = signif),
+            aes(x = canopy, y = pred, color = species, linetype = signif),
             size = 1.2, na.rm = TRUE) +
   scale_color_manual(values = species_colors) +
   scale_linetype_manual(values = c(
@@ -2423,8 +2412,7 @@ Fig4F <- ggplot() +
              aes(x = elev_indiv, y = internode_length_1_2, color = species),
              alpha = 0.25, size = 2.5, na.rm = TRUE) +
   geom_line(data = all_preds,
-            aes(x = elev, y = pred, color = species, linetype = signif,
-      alpha = signif),
+            aes(x = elev, y = pred, color = species, linetype = signif),
             size = 1.2, na.rm = TRUE) +
   scale_color_manual(values = species_colors) +
   scale_linetype_manual(values = c(
@@ -2852,6 +2840,609 @@ S1F
 
 grid.arrange(S1A, S1B, S1C, S1D, S1E, S1F, nrow =3, ncol=2)
 ```
+## plotting model fit
+
+```{r}
+### FIGURE S1A: Predawn by elevation (model-based)
+
+all_preds_elev <- data.frame()
+model_summaries_elev <- data.frame()
+
+for (sp in setdiff(names(species_list), "ABMA")) {
+
+  df <- species_list[[sp]]
+
+  # Fit species-specific model (same structure, elevation is focal)
+  mod <- lmer(
+    predawn_MPa_2024 ~ elev_indiv_scaled + diameter_complete_scaled +
+      canopy_closure_scaled + (1|plot),
+    data = df
+  )
+
+  # Extract p-value for elevation
+  summ <- summary(mod)$coefficients
+  elev_p <- summ["elev_indiv_scaled", "Pr(>|t|)"]
+
+  signif_label <- dplyr::case_when(
+    elev_p < 0.05 ~ "Significant",
+    elev_p < 0.1  ~ "Marginal",
+    TRUE          ~ "Not significant"
+  )
+
+  model_summaries_elev <- dplyr::bind_rows(
+    model_summaries_elev,
+    data.frame(species = sp,
+               p_value = elev_p,
+               signif = signif_label)
+  )
+
+  # Compute mean & SD for elevation (unscaled)
+  mean_e <- mean(df$elev_indiv, na.rm = TRUE)
+  sd_e   <- sd(df$elev_indiv, na.rm = TRUE)
+
+  # Elevation sequence
+  elev_seq <- seq(min(df$elev_indiv, na.rm = TRUE),
+                  max(df$elev_indiv, na.rm = TRUE),
+                  length.out = 100)
+
+  # Prediction data (other covariates at mean = 0 scaled)
+  newdata <- data.frame(
+    elev_indiv_scaled = (elev_seq - mean_e) / sd_e,
+    diameter_complete_scaled = 0,
+    canopy_closure_scaled = 0
+  )
+
+  newdata$elev_ft <- elev_seq
+  newdata$pred <- predict(mod, newdata, re.form = NA)
+  newdata$species <- sp
+  newdata$signif <- signif_label
+
+  all_preds_elev <- dplyr::bind_rows(all_preds_elev, newdata)
+}
+
+
+S1A <- ggplot() +
+  geom_point(
+    data = subset(trait_data1, species != "ABMA"),
+    aes(x = elev_indiv, y = predawn_MPa_2024, color = species),
+    size = 3,
+    alpha = 0.35,
+    na.rm = TRUE
+  ) +
+  scale_color_manual(values = species_colors) +
+  new_scale_color() +
+  geom_line(
+    data = all_preds_elev,
+    aes(x = elev_ft, y = pred,
+        color = species,
+        linetype = signif),
+    size = 1.2,
+    na.rm = TRUE
+  ) +
+  scale_color_manual(values = species_colors) +
+  scale_linetype_manual(values = c(
+    "Significant"     = "solid",
+    "Marginal"        = "dashed",
+    "Not significant" = "dotted"
+  )) +
+  scale_x_continuous(
+    breaks = seq(
+      floor(min(trait_data1$elev_indiv, na.rm = TRUE)),
+      ceiling(max(trait_data1$elev_indiv, na.rm = TRUE)),
+      by = 500
+    )
+  ) +
+  labs(
+    x = "Elevation (ft)",
+    y = "Predawn WP 2024 (MPa)"
+  ) +
+  scale_y_reverse(
+  labels = function(x) paste0("\u2212", x)
+)+
+  theme_bw() +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    legend.position = "none"
+  )
+
+S1A
+
+# ======================
+# S1B: model + predictions
+# ======================
+
+all_preds_S1B <- data.frame()
+model_summaries_S1B <- data.frame()
+
+for (sp in setdiff(names(species_list), "ABMA")) {
+
+  df <- species_list[[sp]]
+
+  mod <- lmer(
+    midday_MPa_2024 ~ elev_indiv_scaled + diameter_complete_scaled +
+      canopy_closure_scaled + (1|plot),
+    data = df
+  )
+
+  summ <- summary(mod)$coefficients
+  elev_p <- summ["elev_indiv_scaled", "Pr(>|t|)"]
+
+  signif_label <- dplyr::case_when(
+    elev_p < 0.05 ~ "Significant",
+    elev_p < 0.1  ~ "Marginal",
+    TRUE          ~ "Not significant"
+  )
+
+  mean_e <- mean(df$elev_indiv, na.rm = TRUE)
+  sd_e   <- sd(df$elev_indiv, na.rm = TRUE)
+
+  elev_seq <- seq(min(df$elev_indiv, na.rm = TRUE),
+                  max(df$elev_indiv, na.rm = TRUE),
+                  length.out = 100)
+
+  newdata <- data.frame(
+    elev_indiv_scaled = (elev_seq - mean_e) / sd_e,
+    diameter_complete_scaled = 0,
+    canopy_closure_scaled = 0
+  )
+
+  newdata$elev_ft <- elev_seq
+  newdata$pred <- predict(mod, newdata, re.form = NA)
+  newdata$species <- sp
+  newdata$signif <- signif_label
+
+  all_preds_S1B <- dplyr::bind_rows(all_preds_S1B, newdata)
+}
+
+# ======================
+# S1B: plot
+# ======================
+
+S1B <- ggplot() +
+  geom_point(
+    data = subset(trait_data1, species != "ABMA"),
+    aes(x = elev_indiv, y = midday_MPa_2024, color = species),
+    size = 3, alpha = 0.35
+  ) +
+  scale_color_manual(values = species_colors) +
+  new_scale_color() +
+  geom_line(
+    data = all_preds_S1B,
+    aes(x = elev_ft, y = pred, color = species, linetype = signif),
+    size = 1.2
+  ) +
+  scale_color_manual(values = species_colors) +
+  scale_linetype_manual(values = c(
+    "Significant" = "solid",
+    "Marginal" = "dashed",
+    "Not significant" = "dotted"
+  )) +
+  labs(
+    x = "Elevation (ft)",
+    y = "Midday WP 2024 (MPa)"
+  ) +scale_y_reverse(
+  labels = function(x) paste0("\u2212", x)
+)+
+  scale_x_continuous(
+    breaks = seq(
+      floor(min(trait_data1$elev_indiv, na.rm = TRUE)),
+      ceiling(max(trait_data1$elev_indiv, na.rm = TRUE)),
+      by = 500
+    )
+  ) +
+  theme_bw() +
+  theme(panel.grid = element_blank(),
+        legend.position = "none")
+
+S1B
+
+
+# ======================
+# S1C: model + predictions
+# ======================
+
+all_preds_S1C <- data.frame()
+model_summaries_S1C <- data.frame()
+
+for (sp in setdiff(names(species_list), "ABMA")) {
+
+  df <- species_list[[sp]]
+
+  mod <- lmer(
+    predawn_MPa_2025 ~ elev_indiv_scaled + diameter_complete_scaled +
+      canopy_closure_scaled + (1 | plot),
+    data = df
+  )
+
+  summ <- summary(mod)$coefficients
+  elev_p <- summ["elev_indiv_scaled", "Pr(>|t|)"]
+
+  signif_label <- dplyr::case_when(
+    elev_p < 0.05 ~ "Significant",
+    elev_p < 0.1 ~ "Marginal",
+    TRUE ~ "Not significant"
+  )
+
+  model_summaries_S1C <- dplyr::bind_rows(
+    model_summaries_S1C,
+    data.frame(species = sp, p_value = elev_p, signif = signif_label)
+  )
+
+  mean_e <- mean(df$elev_indiv, na.rm = TRUE)
+  sd_e <- sd(df$elev_indiv, na.rm = TRUE)
+
+  elev_seq <- seq(
+    min(df$elev_indiv, na.rm = TRUE),
+    max(df$elev_indiv, na.rm = TRUE),
+    length.out = 100
+  )
+
+  newdata <- data.frame(
+    elev_indiv_scaled = (elev_seq - mean_e) / sd_e,
+    diameter_complete_scaled = 0,
+    canopy_closure_scaled = 0
+  )
+
+  newdata$elev_ft <- elev_seq
+  newdata$pred <- predict(mod, newdata, re.form = NA)
+  newdata$species <- sp
+  newdata$signif <- signif_label
+
+  all_preds_S1C <- dplyr::bind_rows(all_preds_S1C, newdata)
+}
+
+# ======================
+# S1C: plot
+# ======================
+
+S1C <- ggplot() +
+  geom_point(
+    data = subset(trait_data1, species != "ABMA"),
+    aes(x = elev_indiv, y = predawn_MPa_2025, color = species),
+    size = 3,
+    alpha = 0.35
+  ) +
+  scale_color_manual(values = species_colors) +
+  ggnewscale::new_scale_color() +
+  geom_line(
+    data = all_preds_S1C,
+    aes(x = elev_ft, y = pred, color = species, linetype = signif),
+    size = 1.2
+  ) +
+  scale_color_manual(values = species_colors) +
+  scale_linetype_manual(values = c(
+    "Significant" = "solid",
+    "Marginal" = "dashed",
+    "Not significant" = "dotted"
+  )) +
+  labs(
+    x = "Elevation (ft)",
+    y = "Predawn WP 2025 (MPa)"
+  ) +
+  scale_y_reverse(
+  labels = function(x) paste0("\u2212", x)
+)+
+  scale_x_continuous(
+    breaks = seq(
+      floor(min(trait_data1$elev_indiv, na.rm = TRUE)),
+      ceiling(max(trait_data1$elev_indiv, na.rm = TRUE)),
+      by = 500
+    )
+  ) +
+  theme_bw() +
+  theme(
+    panel.grid = element_blank(),
+    legend.position = "none"
+  )
+
+S1C
+
+
+# ======================
+# S1D: model + predictions
+# ======================
+
+all_preds_S1D <- data.frame()
+model_summaries_S1D <- data.frame()
+
+for (sp in setdiff(names(species_list), "ABMA")) {
+
+  df <- species_list[[sp]]
+
+  mod <- lmer(
+    midday_MPa_2025 ~ elev_indiv_scaled + diameter_complete_scaled +
+      canopy_closure_scaled + (1 | plot),
+    data = df
+  )
+
+  summ <- summary(mod)$coefficients
+  elev_p <- summ["elev_indiv_scaled", "Pr(>|t|)"]
+
+  signif_label <- dplyr::case_when(
+    elev_p < 0.05 ~ "Significant",
+    elev_p < 0.1 ~ "Marginal",
+    TRUE ~ "Not significant"
+  )
+
+  model_summaries_S1D <- dplyr::bind_rows(
+    model_summaries_S1D,
+    data.frame(species = sp, p_value = elev_p, signif = signif_label)
+  )
+
+  mean_e <- mean(df$elev_indiv, na.rm = TRUE)
+  sd_e <- sd(df$elev_indiv, na.rm = TRUE)
+
+  elev_seq <- seq(
+    min(df$elev_indiv, na.rm = TRUE),
+    max(df$elev_indiv, na.rm = TRUE),
+    length.out = 100
+  )
+
+  newdata <- data.frame(
+    elev_indiv_scaled = (elev_seq - mean_e) / sd_e,
+    diameter_complete_scaled = 0,
+    canopy_closure_scaled = 0
+  )
+
+  newdata$elev_ft <- elev_seq
+  newdata$pred <- predict(mod, newdata, re.form = NA)
+  newdata$species <- sp
+  newdata$signif <- signif_label
+
+  all_preds_S1D <- dplyr::bind_rows(all_preds_S1D, newdata)
+}
+
+# ======================
+# S1D: plot
+# ======================
+
+S1D <- ggplot() +
+  geom_point(
+    data = subset(trait_data1, species != "ABMA"),
+    aes(x = elev_indiv, y = midday_MPa_2025, color = species),
+    size = 3,
+    alpha = 0.35
+  ) +
+  scale_color_manual(values = species_colors) +
+  ggnewscale::new_scale_color() +
+  geom_line(
+    data = all_preds_S1D,
+    aes(x = elev_ft, y = pred, color = species, linetype = signif),
+    size = 1.2
+  ) +
+  scale_color_manual(values = species_colors) +
+  scale_linetype_manual(values = c(
+    "Significant" = "solid",
+    "Marginal" = "dashed",
+    "Not significant" = "dotted"
+  )) +
+  labs(
+    x = "Elevation (ft)",
+    y = "Midday WP 2025 (MPa)"
+  ) + scale_y_reverse(
+  labels = function(x) paste0("\u2212", x)
+) + 
+  scale_x_continuous(
+    breaks = seq(
+      floor(min(trait_data1$elev_indiv, na.rm = TRUE)),
+      ceiling(max(trait_data1$elev_indiv, na.rm = TRUE)),
+      by = 500
+    )
+  ) +
+  theme_bw() +
+  theme(
+    panel.grid = element_blank(),
+    legend.position = "none"
+  )
+
+S1D
+
+
+# ======================
+# S1E: model + predictions
+# ======================
+
+all_preds_S1E <- data.frame()
+model_summaries_S1E <- data.frame()
+
+for (sp in setdiff(names(species_list), "ABMA")) {
+
+  df <- species_list[[sp]]
+
+  mod <- lmer(
+    predawn_MPa_combined ~ elev_indiv_scaled + diameter_complete_scaled +
+      canopy_closure_scaled + (1 | plot) + (1 | year),
+    data = df
+  )
+
+  summ <- summary(mod)$coefficients
+  elev_p <- summ["elev_indiv_scaled", "Pr(>|t|)"]
+
+  signif_label <- dplyr::case_when(
+    elev_p < 0.05 ~ "Significant",
+    elev_p < 0.1 ~ "Marginal",
+    TRUE ~ "Not significant"
+  )
+
+  model_summaries_S1E <- dplyr::bind_rows(
+    model_summaries_S1E,
+    data.frame(species = sp, p_value = elev_p, signif = signif_label)
+  )
+
+  mean_e <- mean(df$elev_indiv, na.rm = TRUE)
+  sd_e <- sd(df$elev_indiv, na.rm = TRUE)
+
+  elev_seq <- seq(
+    min(df$elev_indiv, na.rm = TRUE),
+    max(df$elev_indiv, na.rm = TRUE),
+    length.out = 100
+  )
+
+  newdata <- data.frame(
+    elev_indiv_scaled = (elev_seq - mean_e) / sd_e,
+    diameter_complete_scaled = 0,
+    canopy_closure_scaled = 0
+  )
+
+  newdata$elev_ft <- elev_seq
+  newdata$pred <- predict(mod, newdata, re.form = NA)
+  newdata$species <- sp
+  newdata$signif <- signif_label
+
+  all_preds_S1E <- dplyr::bind_rows(all_preds_S1E, newdata)
+}
+
+# ======================
+# S1E: plot
+# ======================
+
+S1E <- ggplot() +
+  geom_point(
+    data = subset(trait_data1, species != "ABMA"),
+    aes(x = elev_indiv, y = predawn_MPa_combined, color = species),
+    size = 3,
+    alpha = 0.35
+  ) +
+  scale_color_manual(values = species_colors) +
+  ggnewscale::new_scale_color() +
+  geom_line(
+    data = all_preds_S1E,
+    aes(x = elev_ft, y = pred, color = species, linetype = signif),
+    size = 1.2
+  ) +
+  scale_color_manual(values = species_colors) +
+  scale_linetype_manual(values = c(
+    "Significant" = "solid",
+    "Marginal" = "dashed",
+    "Not significant" = "dotted"
+  )) +
+  labs(
+    x = "Elevation (ft)",
+    y = "Predawn WP (2-year average) (MPa)"
+  ) + scale_y_reverse(
+  labels = function(x) paste0("\u2212", x)
+) + 
+  scale_x_continuous(
+    breaks = seq(
+      floor(min(trait_data1$elev_indiv, na.rm = TRUE)),
+      ceiling(max(trait_data1$elev_indiv, na.rm = TRUE)),
+      by = 500
+    )
+  ) +
+  theme_bw() +
+  theme(
+    panel.grid = element_blank(),
+    legend.position = "none"
+  )
+
+S1E
+
+
+# ======================
+# S1F: model + predictions
+# ======================
+
+all_preds_S1F <- data.frame()
+model_summaries_S1F <- data.frame()
+
+for (sp in setdiff(names(species_list), "ABMA")) {
+
+  df <- species_list[[sp]]
+
+  mod <- lmer(
+    midday_MPa_combined ~ elev_indiv_scaled + diameter_complete_scaled +
+      canopy_closure_scaled + (1 | plot) + (1 | year),
+    data = df
+  )
+
+  summ <- summary(mod)$coefficients
+  elev_p <- summ["elev_indiv_scaled", "Pr(>|t|)"]
+
+  signif_label <- dplyr::case_when(
+    elev_p < 0.05 ~ "Significant",
+    elev_p < 0.1 ~ "Marginal",
+    TRUE ~ "Not significant"
+  )
+
+  model_summaries_S1F <- dplyr::bind_rows(
+    model_summaries_S1F,
+    data.frame(species = sp, p_value = elev_p, signif = signif_label)
+  )
+
+  mean_e <- mean(df$elev_indiv, na.rm = TRUE)
+  sd_e <- sd(df$elev_indiv, na.rm = TRUE)
+
+  elev_seq <- seq(
+    min(df$elev_indiv, na.rm = TRUE),
+    max(df$elev_indiv, na.rm = TRUE),
+    length.out = 100
+  )
+
+  newdata <- data.frame(
+    elev_indiv_scaled = (elev_seq - mean_e) / sd_e,
+    diameter_complete_scaled = 0,
+    canopy_closure_scaled = 0
+  )
+
+  newdata$elev_ft <- elev_seq
+  newdata$pred <- predict(mod, newdata, re.form = NA)
+  newdata$species <- sp
+  newdata$signif <- signif_label
+
+  all_preds_S1F <- dplyr::bind_rows(all_preds_S1F, newdata)
+}
+
+# ======================
+# S1F: plot
+# ======================
+
+S1F <- ggplot() +
+  geom_point(
+    data = subset(trait_data1, species != "ABMA"),
+    aes(x = elev_indiv, y = midday_MPa_combined, color = species),
+    size = 3,
+    alpha = 0.35
+  ) +
+  scale_color_manual(values = species_colors) +
+  ggnewscale::new_scale_color() +
+  geom_line(
+    data = all_preds_S1F,
+    aes(x = elev_ft, y = pred, color = species, linetype = signif),
+    size = 1.2
+  ) +
+  scale_color_manual(values = species_colors) +
+  scale_linetype_manual(values = c(
+    "Significant" = "solid",
+    "Marginal" = "dashed",
+    "Not significant" = "dotted"
+  )) +
+  labs(
+    x = "Elevation (ft)",
+    y = "Midday WP (2-year average) (MPa)"
+  ) +
+  theme_bw() + scale_y_reverse(
+  labels = function(x) paste0("\u2212", x)
+) + 
+  scale_x_continuous(
+    breaks = seq(
+      floor(min(trait_data1$elev_indiv, na.rm = TRUE)),
+      ceiling(max(trait_data1$elev_indiv, na.rm = TRUE)),
+      by = 500
+    )
+  ) +
+  theme(
+    panel.grid = element_blank(),
+    legend.position = "none"
+  )
+
+S1F
+
+grid.arrange(S1A, S1B, S1C, S1D, S1E, S1F, nrow = 3, ncol = 2)
+
+
+```
+
 
 
 # stats - Table 1, 2, 3
