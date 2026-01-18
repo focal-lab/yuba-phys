@@ -446,7 +446,7 @@ scale_alpha_manual(values = c(
 ) +
   labs(
     x = "Basal diameter (cm)",
-    y = "Predawn water potential (MPa)"
+    y = expression(Psi[predawn]~"(MPa)")
   ) +
   theme(
     panel.background = element_rect(fill = "white", color = NA),
@@ -547,7 +547,7 @@ scale_linetype_manual(values = c(
   labels = function(x) paste0("\u2212", x)
 ) + 
   labs(x = "Basal diameter (cm)",
-       y = "Midday water potential (MPa)")  +
+       y = expression(Psi[midday]~"(MPa)"))  +
   theme(
     panel.background = element_rect(fill = "white", color = NA),
     panel.border = element_rect(color = "gray50", fill = NA, size = 1),  # ← this creates the box
@@ -837,7 +837,7 @@ scale_alpha_manual(values = c(
     panel.grid = element_blank(),       
     axis.line = element_blank(),         
     plot.background = element_rect(fill = "white", color = NA),
-    legend.position = "bottom"
+    legend.position = "none"
   )
 Fig2A
 
@@ -931,7 +931,7 @@ scale_alpha_manual(values = c(
   scale_x_reverse(
     labels = function(x) paste0("\u2212", abs(x))
   ) +
-  labs(x = "Predawn water potential (MPa)",
+  labs(x = expression(Psi[predawn]~"(MPa)"),
        y = expression(P[50]~"(MPa)"))   +
   theme(
     panel.background = element_rect(fill = "white", color = NA),
@@ -1730,7 +1730,7 @@ Fig3G <- ggplot() +
   scale_x_reverse(
     labels = function(x) paste0("\u2212", abs(x))
   ) +
-  labs(x = "Predawn water potential (MPa)",
+  labs(x = expression(Psi[predawn]~"(MPa)"),
        y = expression(HSM[midday]~"(MPa)")) + 
   theme(
     panel.background = element_rect(fill = "white", color = NA),
@@ -2081,7 +2081,7 @@ Fig4B <- ggplot() +
   scale_x_reverse(
     labels = function(x) paste0("\u2212", abs(x))
   ) +
-  labs(x = "Predawn water potential (MPa)",
+  labs(x = expression(Psi[predawn]~"(MPa)"),
        y = "Internode length (cm)")  +
   theme(
     panel.background = element_rect(fill = "white", color = NA),
@@ -2934,7 +2934,7 @@ S1A <- ggplot() +
   ) +
   labs(
     x = "Elevation (ft)",
-    y = "Predawn WP 2024 (MPa)"
+    y = expression(Psi[predawn]~"(MPa)"~"2024")
   ) +
   scale_y_reverse(
   labels = function(x) paste0("\u2212", x)
@@ -3020,7 +3020,7 @@ S1B <- ggplot() +
   )) +
   labs(
     x = "Elevation (ft)",
-    y = "Midday WP 2024 (MPa)"
+    y = expression(Psi[midday]~"(MPa)"~"2024")
   ) +scale_y_reverse(
   labels = function(x) paste0("\u2212", x)
 )+
@@ -3118,7 +3118,7 @@ S1C <- ggplot() +
   )) +
   labs(
     x = "Elevation (ft)",
-    y = "Predawn WP 2025 (MPa)"
+    y = expression(Psi[predawn]~"(MPa)"~"2025")
   ) +
   scale_y_reverse(
   labels = function(x) paste0("\u2212", x)
@@ -3219,7 +3219,7 @@ S1D <- ggplot() +
   )) +
   labs(
     x = "Elevation (ft)",
-    y = "Midday WP 2025 (MPa)"
+    y = expression(Psi[midday]~"(MPa)"~"2025")
   ) + scale_y_reverse(
   labels = function(x) paste0("\u2212", x)
 ) + 
@@ -3319,7 +3319,7 @@ S1E <- ggplot() +
   )) +
   labs(
     x = "Elevation (ft)",
-    y = "Predawn WP (2-year average) (MPa)"
+   y = expression(Psi[predawn]~"(MPa)"~"2-year average")
   ) + scale_y_reverse(
   labels = function(x) paste0("\u2212", x)
 ) + 
@@ -3419,7 +3419,7 @@ S1F <- ggplot() +
   )) +
   labs(
     x = "Elevation (ft)",
-    y = "Midday WP (2-year average) (MPa)"
+    y = expression(Psi[midday]~"(MPa)"~"2-year average")
   ) +
   theme_bw() + scale_y_reverse(
   labels = function(x) paste0("\u2212", x)
@@ -3510,120 +3510,3 @@ mod9 <- lmer(HSM_predawn_P50_mean_scaled ~DBH_complete_scaled + elev_indiv_scale
 anova(mod6, mod7, mod8, mod9)
 ```
 
-# fitted models
-```{r}
-ABCO_cleaned_data <- ABCO[!is.na(ABCO$DBH_complete) & !is.na(ABCO$percent_cover) & !is.na(ABCO$y), ]
-ABCO_cleaned_data <- ABCO[!is.na(ABCO$DBH_complete) & !is.na(ABCO$percent_cover), ]
-
-
-mod7<- lmer(ABCO$midday_MPa~ DBH_complete + percent_cover +DBH_complete:percent_cover + (1|plot), REML = TRUE, data = PILA)
-summary(mod7)
-
-#Get the fitted values (predicted values) from the model
-fitted_values <- fitted(mod7)
-
-# Create a new dataframe with predictors and fitted values
-fitted_data <- data.frame(DBH = ABCO_cleaned_data$DBH_complete, 
-                        percent_closure = ABCO_cleaned_data$percent_cover, 
-                        fitted_values = fitted_values)
-
-library(ggplot2)
-ggplot(plot_data, aes(x = x1, y = fitted_values, color = x2)) +
-  geom_line() +  # Fit line
-  geom_point(data = your_data, aes(x = x1, y = y), color = "red", alpha = 0.5) +  # Raw data as points
-  labs(title = "Fitted Values from Linear Mixed Model",
-       x = "Predictor 1 (x1)", y = "Fitted Values (y)") +
-  scale_color_gradient(low = "blue", high = "red") +  # Color gradient for x2
-  theme_minimal()
-
-```
-
-
-#climate check
-```{r}
-library(terra)
-DATADIR = "/Users/anjumgujral/Box Sync/yuba-phys_data/climate-data"
-# Site coordinates
-site_coordinates <- data.frame(
-  plot = paste("plot", c(7, 8, 9, 10, 11, 1, 2, 3, 4, 5)),
-  lat = c(39.511469, 39.504699, 39.507502, 39.507644, 39.513851,
-          39.491387, 39.490947, 39.487019, 39.478789, 39.472552),
-  lon = c(-120.829953, -120.780825, -120.786236, -120.778930, -120.826322,
-          -121.051720, -121.046958, -121.006063, -121.000819, -121.004718)
-)
-
-# Convert to spatial points
-sites_sp <- vect(site_coordinates, geom = c("lon", "lat"), crs = "EPSG:4326")
-
-# Load rasters (adjust paths to where you saved the files)
-
-# Load the ASC file
-aet_rast <- rast("/Users/anjumgujral/Documents/repos/yuba-phys/climate-data/BCMv8_1991_2020_aves/aet1991_2020_ave.asc")
-pet_rast <- rast("/Users/anjumgujral/Documents/repos/yuba-phys/climate-data/BCMv8_1991_2020_aves/pet1991_2020_ave.asc")
-map_rast <- rast("/Users/anjumgujral/Documents/repos/yuba-phys/climate-data/BCMv8_1991_2020_aves/ppt1991_2020_ave.asc")
-cwd_rast <- rast("/Users/anjumgujral/Documents/repos/yuba-phys/climate-data/BCMv8_1991_2020_aves/cwd1991_2020_ave.asc")
-
-# Extract PET and AET values for each plot
-aet_vals <- extract(aet_rast, sites_sp)
-pet_vals <- extract(pet_rast, sites_sp)
-cwd_vals <- extract(cwd_rast,sites_sp)
-
-# Combine into site data
-site_coordinates$AET <- aet_vals[, 2]
-site_coordinates$PET <- pet_vals[, 2]
-site_coordinates$CWD <- cwd_vals[, 2]
-
-
-ggplot(site_coordinates, aes(x = elevation, y = CWD, color = CWD)) +
-  geom_point(size = 4) +
-  scale_color_viridis_c() +
-  labs(
-    x = "Elevation (m)",
-    y = "CWD",
-    color = "CWD"
-  ) +
-  theme_minimal()
-
-elevations <- c(
-  5550,  # plot7
-  5690,  # plot8
-  5700,  # plot9
-  5700,  # plot10
-  5630,  # plot11
-  3268,  # plot1
-  3050,  # plot2
-  4041,  # plot3
-  4290,  # plot4
-  4150   # plot5
-)
-
-```
-
-
-
-# boxplots
-```{r}
-library(ggplot2)
-
-ggplot(subset(trait_data2, !is.na(microsite) & !is.na(size)), aes(x = microsite, y = HSM_predawn_P50_mean, fill = size)) + 
-  geom_boxplot(position = position_dodge(0.8), outlier.shape = NA) +
-  geom_jitter(position = position_jitter(width = 0.2), color = "black", alpha = 0.6, size = 1.5) +
-  #scale_fill_manual(values = c(
-    #"seedling" = "skyblue",
-    #"sapling" = "lightgreen"
-  #)) +
-  labs(
-    x = "Microsite",
-    y = "HSM (MPa)",
-    fill = "Size"
-  ) +
-  facet_wrap(~ species) +  
-  theme_bw() +
-  theme(
-    panel.grid.major = element_blank(),
-    panel.grid.minor = element_blank(),
-    strip.background = element_blank(),  
-    strip.text = element_text(size = 12)
-  )
-
-```
