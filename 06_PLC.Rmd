@@ -27,14 +27,10 @@ here = here::here()
 #updater::r_version()
 library(scales)
 library(gridExtra)
-#install.packages("Rmisc")
-library(Rmisc)
 #install.packages("fitplc")
 library(ggrepel)
 library(boot)
-library(DEoptim)
 library(devtools)
-library(quickpsy)
 library(fitplc)
 library(dplyr)
 
@@ -125,6 +121,10 @@ vc_all2 <- vc_all %>%
   mutate(plc_new = 100-(100*kstem_length/mean_kstem_a))%>%   #calculate PLC from 
   drop_na(plc_new)
 
+#save all raw vulnerability curve data
+# note: there are duplicates in here, come back to clean later
+write.csv(vc_all2, file = "yuba-phys-vulnerability-curve-raw-data-2024.csv", row.names = FALSE)
+
 ```
 
 ```{r}
@@ -151,6 +151,13 @@ plot(pfit,
 # Access the fitted coefficients
 coefficients <- coef(pfit)
 print(coefficients)
+```
+
+```{r}
+vc_all_2024_2_cleaned <- data.frame()
+vc_all_2024_2_cleaned <- tibble()
+
+vc_all_2024_2_cleaned <- bind_rows(vc_all_2024_2_cleaned, stemID)
 
 ```
 
@@ -158,7 +165,7 @@ print(coefficients)
 ##PILA -- low elevation 
 ```{r}
 PILA_low_sun_seedling <- vc_all2 %>% 
-  filter((tree %in% c("5001","5007","207")))
+  filter((tree %in% c("177", "5001","5007","207")))
 
 PILA_low_sun_seedling <- PILA_low_sun_seedling %>%
   mutate(k = format(k, scientific = FALSE),  # Ensure 'k' is formatted as non-scientific
@@ -193,11 +200,14 @@ coef(pfit) %>%
 #output:   
 #mean_P50 mean_lwr mean_upr
 #3.946345 3.890444 3.994102
+
+# attach these cleaned curves to the cleaned dataframe
+vc_all_2024_2_cleaned <- bind_rows(vc_all_2024_2_cleaned, PILA_low_sun_seedling_cleaned)
 ```
 
 ```{r}
 PILA_low_shade_seedling <- vc_all2 %>% 
-  filter((tree %in% c("5010")))
+  filter((tree %in% c("31", "151.1", "5010", "5011")))
   
 PILA_low_shade_seedling <- PILA_low_shade_seedling %>%
   mutate(k = format(k, scientific = FALSE),  # Ensure 'k' is formatted as non-scientific
@@ -221,7 +231,7 @@ plot(pfit,
      plotci = F, 
      pxlinecol = "black",
      main = "PILA low elevation, shaded seedling",
-     legend = TRUE,
+     legend = FALSE,
      xlim = c(0.5, 6.5),
      ylim = c(0,1))
 
@@ -235,6 +245,8 @@ coef(pfit) %>%
 # mean_P50 mean_lwr mean_upr
 # 3.420236 3.346096 3.491153
 
+# attach these cleaned curves to the cleaned dataframe
+vc_all_2024_2_cleaned <- bind_rows(vc_all_2024_2_cleaned, PILA_low_shade_seedling_cleaned)
 ```
 
 ```{r}
@@ -274,11 +286,14 @@ coef(pfit) %>%
 # mean_P50 mean_lwr mean_upr
 # 4.035791 3.884941 4.045471
 
+# attach these cleaned curves to the cleaned dataframe
+vc_all_2024_2_cleaned <- bind_rows(vc_all_2024_2_cleaned, PILA_low_sun_sapling_cleaned)
+
 ```
 
 ```{r}
 PILA_low_shade_sapling <-vc_all2 %>% 
-  filter((tree %in% c("8.1","8.2")))
+  filter((tree %in% c("8.1","8.2", "43.2", "46.1", "46.2", "170.1")))
 
 # 170.2 
 #43.2
@@ -300,7 +315,7 @@ plot(pfit,
      plotci = F, 
      pxlinecol = "black",
      main = "PILA low elevation, shaded sapling",
-     legend = TRUE,
+     legend = FALSE,
      xlim = c(0.5,5),
      ylim = c(0,1))
 
@@ -314,6 +329,8 @@ coef(pfit) %>%
 # mean_P50 mean_lwr mean_upr
 # 3.096779 3.066328 3.126015
 
+# attach these cleaned curves to the cleaned dataframe
+vc_all_2024_2_cleaned <- bind_rows(vc_all_2024_2_cleaned, PILA_low_shade_sapling_cleaned)
 ```
 
 ## PILA -- mid elevation
@@ -383,7 +400,7 @@ plot(pfit,
      plotci = F, 
      pxlinecol = "black",
      main = "PILA mid elevation, shaded seedling",
-     legend = TRUE,
+     legend = FALSE,
      xlim = c(0.5, 6.5),
      ylim = c(0,1))
 
@@ -515,6 +532,9 @@ coef(pfit) %>%
 
 #  mean_P50 mean_lwr mean_upr
 # 3.980955 3.872629 4.055284
+
+# attach these cleaned curves to the cleaned dataframe
+vc_all_2024_2_cleaned <- bind_rows(vc_all_2024_2_cleaned, PILA_high_sun_seedling_cleaned)
 ```
 
 ```{r}
@@ -554,6 +574,9 @@ coef(pfit) %>%
 
 # mean_P50 mean_lwr mean_upr
 # 3.949126 3.861037 4.002805
+
+# attach these cleaned curves to the cleaned dataframe
+vc_all_2024_2_cleaned <- bind_rows(vc_all_2024_2_cleaned, PILA_high_shade_seedling_cleaned)
 ```
 
 ```{r}
@@ -579,7 +602,7 @@ plot(pfit,
      plotci = F, 
      pxlinecol = "black",
      main = "PILA high elevation, sun exposed sapling",
-     legend = TRUE,
+     legend = FALSE,
      xlim = c(0.5,6),
      ylim = c(0,1))
 
@@ -593,6 +616,8 @@ coef(pfit) %>%
 # mean_P50 mean_lwr mean_upr
 # 3.405015 3.353651 3.447618
 
+# attach these cleaned curves to the cleaned dataframe
+vc_all_2024_2_cleaned <- bind_rows(vc_all_2024_2_cleaned, PILA_high_sun_sapling_cleaned)
 ```
 
 ```{r}
@@ -632,6 +657,8 @@ coef(pfit) %>%
 # mean_P50 mean_lwr mean_upr
 # 3.378291 3.197237 3.415031
 
+# attach these cleaned curves to the cleaned dataframe
+vc_all_2024_2_cleaned <- bind_rows(vc_all_2024_2_cleaned, PILA_high_shade_sapling_cleaned)
 ```
 
 
@@ -665,6 +692,9 @@ coef(pfit) %>%
   summarise(mean_P50 = mean(estimate), 
             mean_lwr = mean(boot_2_5_percent), 
             mean_upr = mean(boot_97_5_percent))
+
+# attach these cleaned curves to the cleaned dataframe
+vc_all_2024_2_cleaned <- bind_rows(vc_all_2024_2_cleaned, PIPO_low_sun_seedling)
 ```
 
 ```{r}
@@ -729,7 +759,7 @@ plot(pfit,
      plotci = F, 
      pxlinecol = "black",
      main = "PIPO low elevation, sun exposed sapling",
-     legend = TRUE,
+     legend = FALSE,
      xlim = c(0.5,6.5),
      ylim = c(0,1))
 
@@ -742,11 +772,15 @@ coef(pfit) %>%
 
 # mean_P50 mean_lwr mean_upr
 # 4.244883 4.205137 4.280323
+
+# attach these cleaned curves to the cleaned dataframe
+vc_all_2024_2_cleaned <- bind_rows(vc_all_2024_2_cleaned, PIPO_low_sun_sapling_cleaned)
+
 ```
 
 ```{r}
 PIPO_low_shade_sapling <-vc_all2 %>% 
-  filter((tree %in% c("")))
+  filter((tree %in% c("34.2","178.1", "55.2")))
 
 #45.1, 45.2
 
@@ -756,7 +790,7 @@ PIPO_low_shade_sapling <- PIPO_low_shade_sapling %>%
 PIPO_low_shade_sapling <- PIPO_low_shade_sapling %>% filter(valid_data == TRUE)
 
 PIPO_low_shade_sapling_cleaned <- 
-  PIPO_low_shade_sapling %>%  filter(!row_number() %in% c(4, 28, 48))
+  PIPO_low_shade_sapling %>%  filter(!row_number() %in% c(4, 23, 28, 48))
 
 # Fit the model using only rows where plc_new >= 0
 pfit <- fitplcs(PIPO_low_shade_sapling_cleaned, "tree", varnames = c(PLC = "plc_new", WP = "mpa"), nboot = 5)
@@ -767,7 +801,7 @@ plot(pfit,
      plotci = F, 
      pxlinecol = "black",
      main = "PIPO low elevation, shaded sapling",
-     legend = TRUE,
+     legend = FALSE,
      xlim= c(0.5,6),
      ylim = c(0,1))
 
@@ -780,6 +814,11 @@ coef(pfit) %>%
 
 # mean_P50 mean_lwr mean_upr
 # 4.198861 4.143742 4.252357
+
+# attach these cleaned curves to the cleaned dataframe
+vc_all_2024_2_cleaned <- bind_rows(vc_all_2024_2_cleaned, PIPO_low_shade_sapling_cleaned)
+
+
 ```
 
 ##PIPO -- mid elevation 
@@ -848,11 +887,14 @@ coef(pfit) %>%
 # mean_P50 mean_lwr mean_upr
 # 4.587392 4.538742 4.636312
 
+# attach these cleaned curves to the cleaned dataframe
+vc_all_2024_2_cleaned <- bind_rows(vc_all_2024_2_cleaned, PIPO_mid_shade_seedling)
+
 ```
 
 ```{r}
 PIPO_mid_sun_sapling <-vc_all2 %>% 
-  filter((tree %in% c("180.1", "180.2")))
+  filter((tree %in% c("")))
 
 #10.1
 
@@ -892,7 +934,7 @@ coef(pfit) %>%
 
 ```{r}
 PIPO_mid_shade_sapling <-vc_all2 %>% 
-  filter((tree %in% c("34.2","178.1", "55.2")))
+  filter((tree %in% c()))
 #119.1
 #45.1, 45.2
 
@@ -964,6 +1006,10 @@ coef(pfit) %>%
 
 # mean_P50 mean_lwr mean_upr
 # 4.19564 4.102608 4.239264
+
+# attach these cleaned curves to the cleaned dataframe
+vc_all_2024_2_cleaned <- bind_rows(vc_all_2024_2_cleaned, PIPO_high_sun_seedling_cleaned)
+
 ```
 
 ```{r}
@@ -1000,6 +1046,9 @@ coef(pfit) %>%
 
 # mean_P50 mean_lwr mean_upr
 # 3.933056 3.880984 3.996827
+
+# attach these cleaned curves to the cleaned dataframe
+vc_all_2024_2_cleaned <- bind_rows(vc_all_2024_2_cleaned, PIPO_high_shade_seedling_cleaned)
 ```
 
 ```{r}
@@ -1036,6 +1085,8 @@ coef(pfit) %>%
 
 # mean_P50 mean_lwr mean_upr
 # 4.043665 3.906704 4.095981
+
+vc_all_2024_2_cleaned <- bind_rows(vc_all_2024_2_cleaned, PIPO_high_sun_sapling_cleaned)
 
 ```
 
@@ -1076,13 +1127,15 @@ coef(pfit) %>%
 # mean_P50 mean_lwr mean_upr
 # 3.463569 3.417393 3.552126
 
+vc_all_2024_2_cleaned <- bind_rows(vc_all_2024_2_cleaned, PIPO_high_shade_sapling_cleaned)
+
 ```
 
 #ABCO P50
 ##ABCO -- low elevation
 ```{r}
 ABCO_low_sun_seedling <- vc_all2 %>% 
-  filter((tree %in% c("5008")))
+  filter((tree %in% c("164", "167", "5008")))
 
 ABCO_low_sun_seedling <- ABCO_low_sun_seedling %>%
   mutate(k = format(k, scientific = FALSE),  # Ensure 'k' is formatted as non-scientific
@@ -1117,11 +1170,13 @@ coef(pfit) %>%
 # mean_P50 mean_lwr mean_upr
 # 4.584102 4.421904 4.625231
 
+vc_all_2024_2_cleaned <- bind_rows(vc_all_2024_2_cleaned, ABCO_low_sun_seedling_cleaned)
 ```
 
 ```{r}
 ABCO_low_shade_seedling <- vc_all2 %>% 
-  filter((tree %in% c("5006")))
+  filter((tree %in% c("33" , "153", "5006")))
+
 
 #5002 <- good curve but very low P50 (-5.5), maybe cuvette broke?
   
@@ -1155,11 +1210,14 @@ coef(pfit) %>%
 
 # mean_P50 mean_lwr mean_upr
 #4.48222  4.37921 4.543011
+
+vc_all_2024_2_cleaned <- bind_rows(vc_all_2024_2_cleaned, ABCO_low_shade_seedling_cleaned)
+
 ```
 
 ```{r}
 ABCO_low_sun_sapling <-vc_all2 %>% 
-  filter((tree %in% c("186.1", "186.2")))
+  filter((tree %in% c("150.1" ,"186.1", "186.2", "200.1", "209.1")))
 
 #102.1, 
 #200.2 <- good curve but needs kmax reassigned
@@ -1193,6 +1251,8 @@ coef(pfit) %>%
 
 # mean_P50 mean_lwr mean_upr
 # 4.486094 4.415758 4.546265
+
+vc_all_2024_2_cleaned <- bind_rows(vc_all_2024_2_cleaned, ABCO_low_sun_sapling_cleaned)
 
 ```
 
@@ -1359,6 +1419,7 @@ ABCO_mid_shade_sapling <- ABCO_mid_shade_sapling %>% filter(valid_data == TRUE)
 
 ABCO_mid_shade_sapling_cleaned <- ABCO_mid_shade_sapling %>%  filter(!row_number() %in% c(34, 38, 39, 47, 51, 52, 61, 110))
 
+
 # Fit the model using only rows where plc_new >= 0
 pfit <- fitplcs(ABCO_mid_shade_sapling_cleaned, "tree", varnames = c(PLC = "plc_new", WP = "mpa"), nboot = 5)
 
@@ -1381,6 +1442,8 @@ coef(pfit) %>%
 
 # mean_P50 mean_lwr mean_upr
 # 4.020843  3.96401 4.072884
+
+vc_all_2024_2_cleaned <- bind_rows(vc_all_2024_2_cleaned, ABCO_mid_shade_sapling_cleaned)
 
 ```
 
@@ -1422,6 +1485,9 @@ coef(pfit) %>%
 
 # mean_P50 mean_lwr mean_upr
 # 4.39191 4.245323 4.686521
+
+vc_all_2024_2_cleaned <- bind_rows(vc_all_2024_2_cleaned, ABCO_high_sun_seedling_cleaned)
+
 ```
 
 ```{r}
@@ -1460,6 +1526,9 @@ coef(pfit) %>%
 
 # mean_P50 mean_lwr mean_upr
 # 4.419759 4.396273 4.511261
+
+vc_all_2024_2_cleaned <- bind_rows(vc_all_2024_2_cleaned, ABCO_high_shade_seedling_cleaned)
+
 ```
 
 ```{r}
@@ -1499,6 +1568,8 @@ coef(pfit) %>%
 # mean_P50 mean_lwr mean_upr
 # 3.777402 3.648038 3.895114
 
+vc_all_2024_2_cleaned <- bind_rows(vc_all_2024_2_cleaned, ABCO_high_sun_sapling_cleaned)
+
 ```
 
 ```{r}
@@ -1537,6 +1608,9 @@ coef(pfit) %>%
 
 # mean_P50 mean_lwr mean_upr
 # 4.04298 3.940145 4.111902
+
+vc_all_2024_2_cleaned <- bind_rows(vc_all_2024_2_cleaned, ABCO_high_shade_sapling_cleaned)
+
 ```
 
 #ABMA P50
@@ -1575,6 +1649,8 @@ coef(pfit) %>%
 # mean_P50 mean_lwr mean_upr
 # 4.241517 4.172947 4.279737
 
+vc_all_2024_2_cleaned <- bind_rows(vc_all_2024_2_cleaned, ABMA_high_sun_seedling_cleaned)
+
 ```
 
 ```{r}
@@ -1612,6 +1688,8 @@ coef(pfit) %>%
 
 # mean_P50 mean_lwr mean_upr
 # 4.337336  4.28198 4.447232
+
+vc_all_2024_2_cleaned <- bind_rows(vc_all_2024_2_cleaned, ABMA_high_shade_seedling_cleaned)
 
 ```
 
@@ -1655,6 +1733,8 @@ coef(pfit) %>%
 # mean_P50 mean_lwr mean_upr
 # 4.132574 4.046866 4.181001
 
+vc_all_2024_2_cleaned <- bind_rows(vc_all_2024_2_cleaned, ABMA_high_sun_sapling_cleaned)
+
 ```
 
 ```{r}
@@ -1692,6 +1772,12 @@ coef(pfit) %>%
 
 # mean_P50 mean_lwr mean_upr
 # 3.635542 3.421669 3.904172
+
+vc_all_2024_2_cleaned <- bind_rows(vc_all_2024_2_cleaned, ABMA_high_shade_sapling_cleaned)
+```
+#2024 cleaned df
+```{r}
+write.csv(vc_all_2024_2_cleaned,"yuba-phys-vulnerability-curve-cleaned-data-2024.csv", row.names = FALSE)
 ```
 
 #species, site, size means
@@ -1926,7 +2012,7 @@ vc_all_2025_2 <- vc_all_2025 %>%
   mutate(plc_new = 100 - (100 * kstem_length / mean_kstem_a)) %>%   #calculate PLC from 
   drop_na(plc_new)
 
-
+write.csv(vc_all_2025_2, file = "yuba-phys-vulnerability-curve-raw-data-2025.csv", row.names = FALSE)
 
 ```
 
@@ -1934,7 +2020,7 @@ vc_all_2025_2 <- vc_all_2025 %>%
 ```{r}
 #Have to do each tree individually and remove the ones that do not work: 
 
-stemID <- subset(vc_all_2025_2, vc_all_2025_2$tree =="21")
+stemID <- subset(vc_all_2025_2, vc_all_2025_2$tree =="5")
 # Convert all numeric columns to avoid scientific notation
 #stemID <- stemID %>%
   #mutate(k = format(k, scientific = FALSE))
@@ -1960,7 +2046,7 @@ print(coefficients)
 
 ```{r}
 PLC_2025 <- vc_all_2025_2 %>% 
-  filter((tree %in% c("419")))
+  filter((tree %in% c("465")))
 
 PLC_2025 <- PLC_2025 %>%
   mutate(k = format(k, scientific = FALSE),  # Ensure 'k' is formatted as non-scientific
@@ -1968,18 +2054,21 @@ PLC_2025 <- PLC_2025 %>%
 
 PLC_2025 <- PLC_2025 %>% filter(valid_data == TRUE)
 
-PLC_2025_cleaned <- 
-  PLC_2025 %>%  filter(!row_number() %in% c(2, 3, 4, 6, 7, 9))
+#PLC_2025 <- PLC_2025 %>%
+  #slice(1:28)
 
-PLC_2025_cleaned <- PLC_2025_cleaned %>%
+PLC_2025_cleaned <- 
+  PLC_2025 %>%  filter(!row_number() %in% c(5, 8))
+
+PLC_2025_cleaned <- PLC_2025 %>%
   mutate(type = case_when(
-    row_number() == 1 ~ "kmax",          # ← set row 5 as new kmax
+    row_number() == 2 ~ "kmax",          # ← set row 5 as new kmax
     TRUE ~ type
   ))
 
 # 1. Identify the new kmax value
 new_kmax <- PLC_2025_cleaned %>%
-  filter(row_number() == 1) %>%  # <- or your specific condition
+  filter(row_number() == 2) %>%  # <- or your specific condition
   pull(k) %>% as.numeric()
 
 # 2. Recalculate PLC using new kmax
@@ -2028,9 +2117,69 @@ PLC_2025_cleaned <- PLC_2025_cleaned %>%
 
 vc_all_2025_2_cleaned <- bind_rows(vc_all_2025_2_cleaned, PLC_2025_cleaned)
 
+write.csv(vc_all_2025_2_cleaned, "vulnerability_curves_cleaned_2025.csv")
 
 
 
+```
+
+#automate through
+```{r}
+library(dplyr)
+
+# Get unique tree IDs
+tree_ids <- unique(vc_all_2025_2$tree)
+
+# Empty lists to store results
+model_list <- list()
+coef_list  <- list()
+
+for (t in tree_ids) {
+
+  # Subset for one tree
+  stemID <- vc_all_2025_2 %>%
+    filter(tree == t) %>%
+    mutate(
+      k = format(k, scientific = FALSE),
+      valid_data = plc_new >= 0
+    )
+
+  # Skip trees with no valid data
+  if (sum(stemID$valid_data) == 0) {
+    warning(paste("No valid data for tree", t))
+    next
+  }
+
+  # Fit model
+  pfit <- fitplc(
+    stemID %>% filter(valid_data),
+    varnames = c(PLC = "plc_new", WP = "mpa"),
+    nboot = 50
+  )
+  plot(
+    pfit,
+    xlim = c(0, 7),
+    ylim = c(0, 1),
+    main = paste("Tree", t)
+  )
+  # Store model and coefficients
+  model_list[[as.character(t)]] <- pfit
+  coef_list[[as.character(t)]]  <- coef(pfit)
+}
+
+
+
+coef_df <- bind_rows(
+  lapply(names(coef_list), function(t) {
+    data.frame(
+      tree = t,
+      t(coef_list[[t]]),
+      row.names = NULL
+    )
+  })
+)
+
+print(coef_df)
 
 
 ```
