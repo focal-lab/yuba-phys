@@ -22,12 +22,8 @@ library(beeswarm)
 library(tidyverse)
 geom_beeswarm = ggbeeswarm::geom_beeswarm()
 here = here::here()
-#install.packages("updater")
-#library(updater)
-#updater::r_version()
 library(scales)
 library(gridExtra)
-#install.packages("fitplc")
 library(ggrepel)
 library(boot)
 library(devtools)
@@ -2014,13 +2010,15 @@ vc_all_2025_2 <- vc_all_2025 %>%
 
 write.csv(vc_all_2025_2, file = "yuba-phys-vulnerability-curve-raw-data-2025.csv", row.names = FALSE)
 
+vc_raw_2025 <- read.csv("yuba-phys-vulnerability-curve-raw-data-2025.csv")
+
 ```
 
 
 ```{r}
 #Have to do each tree individually and remove the ones that do not work: 
 
-stemID <- subset(vc_all_2025_2, vc_all_2025_2$tree =="5")
+stemID <- subset(vc_raw_2025, vc_raw_2025$tree =="456")
 # Convert all numeric columns to avoid scientific notation
 #stemID <- stemID %>%
   #mutate(k = format(k, scientific = FALSE))
@@ -2035,13 +2033,16 @@ pfit <- fitplc(stemID %>% filter(valid_data == TRUE), varnames = c(PLC = "plc_ne
 
 # Plot the fitted model
 plot(pfit, 
-     xlim = c(0,7),
+     xlim = c(0,9),
      ylim = c(0,1))
 
 # Access the fitted coefficients
 coefficients <- coef(pfit)
 print(coefficients)
 
+
+vc_clean_2025 <- bind_rows(vc_clean_2025, stemID)
+write.csv(vc_clean_2025, "vc_clean_2025.csv")
 ```
 
 ```{r}
@@ -2117,40 +2118,57 @@ PLC_2025_cleaned <- PLC_2025_cleaned %>%
 
 vc_all_2025_2_cleaned <- bind_rows(vc_all_2025_2_cleaned, PLC_2025_cleaned)
 
+####### DO NOT OVERWRITE THIS CSV ############
 write.csv(vc_all_2025_2_cleaned, "vulnerability_curves_cleaned_2025.csv")
 
+vc_clean_2025_1 <- read.csv("vulnerability_curves_cleaned_2025.csv")
+vc_clean_2025_1 <- vc_clean_2025_1[, -12]
+```
 
+```{r}
+# merge two cleaned data frames (vc_clean_2025)
+
+merged_2025_cleaned_vc <- rbind(vc_clean_2025_1, vc_clean_2025)
+write.csv(merged_2025_cleaned_vc, "yuba-phys-vulnerability-curve-cleaned-data-2025.csv")
 
 ```
 
 #automate through
 ```{r}
 library(dplyr)
+library(fitplc)
 
-# Get unique tree IDs
-tree_ids <- unique(vc_all_2025_2$tree)
+# load in 2024 and 2024 cleaned hydraulics data
+vulnerability_curves_2024 <- read.csv("yuba-phys-vulnerability-curve-cleaned-data-2024.csv")
+vulnerability_curves_2025 <- read.csv("yuba-phys-vulnerability-curve-cleaned-data-2025.csv")
 
-# Empty lists to store results
+# run this for 2024 and 2025 vulnerability curve data
+
+# list of unique tree IDs
+tree_ID <- unique(vulnerability_curves_2024$tree)
+
+# empty lists to store results
 model_list <- list()
 coef_list  <- list()
 
-for (t in tree_ids) {
+# loop through 
+for (t in tree_ID) {
 
   # Subset for one tree
-  stemID <- vc_all_2025_2 %>%
+  stemID <- vulnerability_curves_2024 %>%
     filter(tree == t) %>%
     mutate(
       k = format(k, scientific = FALSE),
       valid_data = plc_new >= 0
     )
 
-  # Skip trees with no valid data
+  # skip trees with no valid data
   if (sum(stemID$valid_data) == 0) {
     warning(paste("No valid data for tree", t))
     next
   }
 
-  # Fit model
+  # fit plc model
   pfit <- fitplc(
     stemID %>% filter(valid_data),
     varnames = c(PLC = "plc_new", WP = "mpa"),
@@ -2160,7 +2178,7 @@ for (t in tree_ids) {
     pfit,
     xlim = c(0, 7),
     ylim = c(0, 1),
-    main = paste("Tree", t)
+    main = paste("tree ID", t)
   )
   # Store model and coefficients
   model_list[[as.character(t)]] <- pfit
@@ -2180,7 +2198,6 @@ coef_df <- bind_rows(
 )
 
 print(coef_df)
-
 
 ```
 
