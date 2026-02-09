@@ -13,6 +13,7 @@ trait_data1 <- trait_data1[trait_data1$species %in% c('ABCO', 'ABMA','PIPO', 'PI
 # delete columns we don't need (size_class, height_m, PARmicromol, 
 # branch_processed_2024, branch_processed_2025)
 
+trait_data1 <- trait_data1 %>% select(-height_m, -PAR_μmol, -branch_processed_2024, -branch_processed_2025)
 
 
 # make a new column turning canopy closure into a categorical variable
